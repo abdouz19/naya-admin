@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-rose: #C4857A;
+  --color-rose-light: #D4A59D;
+  --color-rose-dark: #A96B60;
+  --color-gold: #C9A96E;
+  --color-gold-light: #D9C49A;
+  --color-brown: #5C3D2E;
+  --color-brown-light: #8B5E52;
+  --color-cream: #F8F1EC;
+  --color-beige: #F5F0EB;
+  --color-green: #5CA87E;
+  --color-green-light: #EDF5ED;
+  --color-muted: #9E8A7E;
+  --color-muted-light: #BDB0A8;
+  --color-gray-500: #7C8A97;
+  --color-gray-300: #C7D1D9;
+  --color-gray-200: #E2E8EE;
+  --color-gray-100: #F3F6F9;
+  --color-danger: #D67768;
+  --color-danger-light: #FDE8E4;
+  --color-ink: #1C2B3A;
+
+  --font-heading: 'Cormorant Garamond', serif;
+  --font-body: 'Jost', sans-serif;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Utility classes for custom radius and shadows (Tailwind v4 compat) */
+.radius-sm { border-radius: var(--radius-sm); }
+.radius-md { border-radius: var(--radius-md); }
+.radius-lg { border-radius: var(--radius-lg); }
+.shadow-card { box-shadow: var(--shadow-card); }
+.shadow-card-hover { box-shadow: var(--shadow-card-hover); }
+.shadow-modal { box-shadow: var(--shadow-modal);
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  color: var(--color-brown);
+}
