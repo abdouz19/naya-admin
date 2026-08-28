@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button, Spinner } from '@/components/ui';
 import { useService } from '@/hooks/use-service';
@@ -18,29 +18,17 @@ export function OffresSection() {
   const offersFn = useCallback(() => getOffers(), []);
   const unlockFn = useCallback(() => getUnlockFeatures(), []);
 
-  const { data: offersData, loading: loadingOffers } =
+  const { data: offers, loading: loadingOffers, refetch: refetchOffers } =
     useService<Offer[]>(offersFn);
-  const { data: unlockData, loading: loadingUnlock } =
+  const { data: unlockFeatures, loading: loadingUnlock, refetch: refetchUnlock } =
     useService<UnlockFeature[]>(unlockFn);
 
-  const [offers, setOffers] = useState<Offer[]>([]);
-  const [unlockFeatures, setUnlockFeatures] = useState<UnlockFeature[]>([]);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (offersData) setOffers(offersData);
-  }, [offersData]);
-
-  useEffect(() => {
-    if (unlockData) setUnlockFeatures(unlockData);
-  }, [unlockData]);
-
   async function handleToggleActive(id: string) {
     await toggleOfferActive(id);
-    setOffers((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, isActive: !o.isActive } : o)),
-    );
+    refetchOffers();
   }
 
   function handleEditClick(offer: Offer) {
@@ -50,30 +38,24 @@ export function OffresSection() {
 
   async function handleSaveOffer(id: string, updates: Partial<Omit<Offer, 'id'>>) {
     await updateOffer(id, updates);
-    setOffers((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, ...updates } : o)),
-    );
+    refetchOffers();
   }
 
   async function handleToggleUnlock(id: string) {
-    const feature = unlockFeatures.find((f) => f.id === id);
+    const feature = unlockFeatures?.find((f) => f.id === id);
     if (!feature) return;
     await updateUnlockFeature(id, { enabled: !feature.enabled });
-    setUnlockFeatures((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, enabled: !f.enabled } : f)),
-    );
+    refetchUnlock();
   }
 
   async function handleUpdateUnlockText(id: string, text: string) {
     await updateUnlockFeature(id, { text });
-    setUnlockFeatures((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, text } : f)),
-    );
+    refetchUnlock();
   }
 
   const loading = loadingOffers || loadingUnlock;
 
-  if (loading && offers.length === 0) {
+  if (loading && !offers) {
     return (
       <div className="flex h-48 items-center justify-center">
         <Spinner size="lg" />
@@ -90,7 +72,7 @@ export function OffresSection() {
 
       {/* Offer cards row */}
       <div className="flex flex-col gap-6 lg:flex-row">
-        {offers.map((offer) => (
+        {(offers ?? []).map((offer) => (
           <OfferCard
             key={offer.id}
             offer={offer}
@@ -101,7 +83,7 @@ export function OffresSection() {
       </div>
 
       {/* Unlock features */}
-      {unlockFeatures.length > 0 && (
+      {unlockFeatures && unlockFeatures.length > 0 && (
         <UnlockFeaturesCard
           features={unlockFeatures}
           onToggle={handleToggleUnlock}
