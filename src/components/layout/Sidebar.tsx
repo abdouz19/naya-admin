@@ -5,6 +5,7 @@ import {
   Briefcase,
   Brain,
   PlayCircle,
+  BookOpen,
   MessageSquare,
   CreditCard,
   Settings,
@@ -20,6 +21,7 @@ const navItems = [
   { icon: Briefcase, label: 'Candidatures', to: '/candidatures' },
   { icon: Brain, label: 'IA', to: '/ia' },
   { icon: PlayCircle, label: 'Ateliers', to: '/ateliers' },
+  { icon: BookOpen, label: 'Blog & Conseils', to: '/blog' },
   { icon: MessageSquare, label: 'Communauté', to: '/communaute' },
   { icon: CreditCard, label: 'Abonnements', to: '/abonnements' },
 ];

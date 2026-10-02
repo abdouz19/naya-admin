@@ -5,6 +5,7 @@ import UsersPage from '@/features/users/UsersPage';
 import CandidaturesPage from '@/features/candidatures/CandidaturesPage';
 import AiUsagePage from '@/features/ai-usage/AiUsagePage';
 import AteliersPage from '@/features/ateliers/AteliersPage';
+import BlogAdminPage from '@/features/blog/BlogAdminPage';
 import CommunityPage from '@/features/community/CommunityPage';
 import SubscriptionsPage from '@/features/subscriptions/SubscriptionsPage';
 import SettingsPage from '@/features/settings/SettingsPage';
@@ -18,6 +19,7 @@ export const router = createBrowserRouter([
       { path: 'candidatures', element: <CandidaturesPage /> },
       { path: 'ia', element: <AiUsagePage /> },
       { path: 'ateliers', element: <AteliersPage /> },
+      { path: 'blog', element: <BlogAdminPage /> },
       { path: 'communaute', element: <CommunityPage /> },
       { path: 'abonnements', element: <SubscriptionsPage /> },
       { path: 'reglages', element: <SettingsPage /> },
