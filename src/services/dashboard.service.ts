@@ -145,6 +145,7 @@ export interface SparklinePoint {
 }
 
 export async function getSparklineData(): Promise<{
+  activityPerDay?: SparklinePoint[];
   usersPerDay: SparklinePoint[];
   candidaturesPerDay: SparklinePoint[];
   aiCallsPerDay: SparklinePoint[];
@@ -171,25 +172,30 @@ export async function getSparklineData(): Promise<{
 
   const usersPerDay = days.map((date) => ({
     date,
-    value: mockUsers.filter((u) => u.created_at.slice(0, 10) === date).length,
+    value: mockUsers.filter((u) => u.created_at.slice(0, 10) === date).length || 1,
   }));
 
   const candidaturesPerDay = days.map((date) => ({
     date,
-    value: mockCandidatures.filter((c) => c.date_envoi.slice(0, 10) === date).length,
+    value: mockCandidatures.filter((c) => c.date_envoi.slice(0, 10) === date).length || 1,
   }));
 
   const aiCallsPerDay = days.map((date) => ({
     date,
-    value: mockAiUsage.filter((a) => a.timestamp.slice(0, 10) === date).length,
+    value: mockAiUsage.filter((a) => a.timestamp.slice(0, 10) === date).length || 2,
   }));
 
   const costPerDay = days.map((date) => {
     const dayCost = mockAiUsage
       .filter((a) => a.timestamp.slice(0, 10) === date)
       .reduce((sum, a) => sum + a.cost_usd, 0);
-    return { date, value: Math.round(dayCost * 100) / 100 };
+    return { date, value: Math.round((dayCost || 0.08) * 100) / 100 };
   });
 
-  return delay({ usersPerDay, candidaturesPerDay, aiCallsPerDay, costPerDay });
+  const activityPerDay = days.map((date, idx) => ({
+    date,
+    value: Math.round(Math.sin((idx + 2) * 0.6) * 5 + 14),
+  }));
+
+  return delay({ activityPerDay, usersPerDay, candidaturesPerDay, aiCallsPerDay, costPerDay });
 }

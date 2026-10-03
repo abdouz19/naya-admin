@@ -24,6 +24,7 @@ export default function DashboardPage() {
   const { data: activities, loading: loadingActivities } =
     useService<ActivityItem[]>(activityFn);
   const { data: sparklines, loading: loadingSparklines } = useService<{
+    activityPerDay?: SparklinePoint[];
     usersPerDay: SparklinePoint[];
     candidaturesPerDay: SparklinePoint[];
     aiCallsPerDay: SparklinePoint[];
@@ -80,9 +81,9 @@ export default function DashboardPage() {
       {/* Bottom section: chart + activity */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
         <Card title="Activite des 30 derniers jours">
-          {sparklines?.usersPerDay ? (
+          {(sparklines?.activityPerDay || sparklines?.usersPerDay) ? (
             <LineChart
-              data={sparklines.usersPerDay}
+              data={sparklines.activityPerDay || sparklines.usersPerDay}
               color={CHART_COLORS.rose}
               height={300}
             />
