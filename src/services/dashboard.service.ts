@@ -4,8 +4,11 @@ import { mockPosts } from '@/data/mock-community';
 import { mockAiUsage } from '@/data/mock-ai-usage';
 import { mockWatchRecords } from '@/data/mock-ateliers';
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
+
 const delay = <T>(data: T): Promise<T> =>
-  new Promise((resolve) => setTimeout(() => resolve(data), 120));
+  new Promise((resolve) => setTimeout(() => resolve(data), 80));
 
 export interface DashboardKpis {
   totalUsers: number;
@@ -20,25 +23,36 @@ export interface DashboardKpis {
   reportedPosts: number;
 }
 
-export function getKpis(): Promise<DashboardKpis> {
-  const now = new Date('2026-08-26T12:00:00Z').getTime();
+export async function getKpis(): Promise<DashboardKpis> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/dashboard/kpis`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.totalUsers === 'number') {
+        return data;
+      }
+    }
+  } catch (_) {
+    // fallback
+  }
+
+  const now = Date.now();
   const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
 
   const totalUsers = mockUsers.length;
   const activeThisWeek = mockUsers.filter(
-    (u) => now - new Date(u.last_active_at).getTime() < oneWeekMs
+    (u) => now - new Date(u.last_active_at).getTime() < oneWeekMs,
   ).length;
   const paidUsers = mockUsers.filter((u) => u.has_paid).length;
   const conversionRate = totalUsers > 0 ? paidUsers / totalUsers : 0;
   const totalCandidatures = mockCandidatures.length;
   const entretiensObtenus = mockCandidatures.filter(
-    (c) => c.statut === 'entretien' || c.statut === 'acceptee'
+    (c) => c.statut === 'entretien' || c.statut === 'acceptee',
   ).length;
   const acceptees = mockCandidatures.filter((c) => c.statut === 'acceptee').length;
   const totalAiCalls = mockAiUsage.length;
-  const totalAiCost = Math.round(
-    mockAiUsage.reduce((sum, log) => sum + log.cost_usd, 0) * 100
-  ) / 100;
+  const totalAiCost =
+    Math.round(mockAiUsage.reduce((sum, log) => sum + log.cost_usd, 0) * 100) / 100;
   const reportedPosts = mockPosts.filter((p) => p.reports_count > 0 && !p.is_moderated).length;
 
   return delay({
@@ -63,71 +77,64 @@ export interface ActivityItem {
   user_name: string;
 }
 
-export function getRecentActivity(): Promise<ActivityItem[]> {
+export async function getRecentActivity(): Promise<ActivityItem[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/dashboard/activity`);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data;
+      }
+    }
+  } catch (_) {
+    // fallback
+  }
+
   const activities: ActivityItem[] = [];
 
-  // Recent user joins (last 7 days)
   for (const user of mockUsers) {
-    const created = new Date(user.created_at).getTime();
-    const now = new Date('2026-08-26T12:00:00Z').getTime();
-    if (now - created < 14 * 24 * 60 * 60 * 1000) {
-      activities.push({
-        id: `act-user-${user.id}`,
-        type: 'user_joined',
-        description: `${user.name} a rejoint Nayha`,
-        timestamp: user.created_at,
-        user_name: user.name,
-      });
-    }
+    activities.push({
+      id: `act-user-${user.id}`,
+      type: 'user_joined',
+      description: `${user.name} a rejoint Nayha`,
+      timestamp: user.created_at,
+      user_name: user.name,
+    });
   }
 
-  // Recent candidatures (last 7 days)
   for (const cand of mockCandidatures) {
-    const sent = new Date(cand.date_envoi).getTime();
-    const now = new Date('2026-08-26T12:00:00Z').getTime();
-    if (now - sent < 10 * 24 * 60 * 60 * 1000) {
-      activities.push({
-        id: `act-cand-${cand.id}`,
-        type: 'candidature_sent',
-        description: `${cand.user_name} a postule chez ${cand.entreprise}`,
-        timestamp: cand.date_envoi,
-        user_name: cand.user_name,
-      });
-    }
+    activities.push({
+      id: `act-cand-${cand.id}`,
+      type: 'candidature_sent',
+      description: `${cand.user_name} a postulé chez ${cand.entreprise}`,
+      timestamp: cand.date_envoi,
+      user_name: cand.user_name,
+    });
   }
 
-  // Recent posts (last 7 days)
   for (const post of mockPosts) {
-    const created = new Date(post.created_at).getTime();
-    const now = new Date('2026-08-26T12:00:00Z').getTime();
-    if (now - created < 7 * 24 * 60 * 60 * 1000) {
-      activities.push({
-        id: `act-post-${post.id}`,
-        type: 'post_created',
-        description: `${post.auteur} a publie dans la communaute`,
-        timestamp: post.created_at,
-        user_name: post.auteur,
-      });
-    }
+    activities.push({
+      id: `act-post-${post.id}`,
+      type: 'post_created',
+      description: `${post.auteur} a publié dans la communauté`,
+      timestamp: post.created_at,
+      user_name: post.auteur,
+    });
   }
 
-  // Recent atelier watches (last 14 days)
   for (const record of mockWatchRecords) {
-    const watched = new Date(record.watched_at).getTime();
-    const now = new Date('2026-08-26T12:00:00Z').getTime();
-    if (now - watched < 14 * 24 * 60 * 60 * 1000) {
-      activities.push({
-        id: `act-atelier-${record.atelier_id}-${record.user_id}`,
-        type: 'atelier_watched',
-        description: `${record.user_name} a visionne un atelier`,
-        timestamp: record.watched_at,
-        user_name: record.user_name,
-      });
-    }
+    activities.push({
+      id: `act-atelier-${record.atelier_id}-${record.user_id}`,
+      type: 'atelier_watched',
+      description: `${record.user_name} a visionné un atelier`,
+      timestamp: record.watched_at,
+      user_name: record.user_name,
+    });
   }
 
-  // Sort by timestamp descending, take top 30
-  activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  activities.sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+  );
 
   return delay(activities.slice(0, 30));
 }
@@ -137,15 +144,27 @@ export interface SparklinePoint {
   value: number;
 }
 
-export function getSparklineData(): Promise<{
+export async function getSparklineData(): Promise<{
   usersPerDay: SparklinePoint[];
   candidaturesPerDay: SparklinePoint[];
   aiCallsPerDay: SparklinePoint[];
   costPerDay: SparklinePoint[];
 }> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/dashboard/sparklines`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.usersPerDay)) {
+        return data;
+      }
+    }
+  } catch (_) {
+    // fallback
+  }
+
   const days: string[] = [];
   for (let i = 29; i >= 0; i--) {
-    const d = new Date('2026-08-26T00:00:00Z');
+    const d = new Date();
     d.setDate(d.getDate() - i);
     days.push(d.toISOString().slice(0, 10));
   }
