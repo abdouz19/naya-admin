@@ -48,7 +48,6 @@ export default function DashboardPage() {
         <KpiCard
           label="Utilisatrices"
           value={formatNumber(kpis?.totalUsers ?? 0)}
-          delta={12}
           icon={Users}
           sparklineData={sparklines?.usersPerDay}
           sparklineColor={CHART_COLORS.rose}
@@ -56,14 +55,12 @@ export default function DashboardPage() {
         <KpiCard
           label="Actives cette semaine"
           value={formatNumber(kpis?.activeThisWeek ?? 0)}
-          delta={8}
           icon={Activity}
           sparklineColor={CHART_COLORS.gold}
         />
         <KpiCard
           label="Candidatures"
           value={formatNumber(kpis?.totalCandidatures ?? 0)}
-          delta={23}
           icon={Briefcase}
           sparklineData={sparklines?.candidaturesPerDay}
           sparklineColor={CHART_COLORS.green}
@@ -71,7 +68,6 @@ export default function DashboardPage() {
         <KpiCard
           label="Cout IA ce mois"
           value={formatCurrency(kpis?.totalAiCost ?? 0)}
-          delta={-5}
           icon={Brain}
           sparklineData={sparklines?.costPerDay}
           sparklineColor={CHART_COLORS.danger}

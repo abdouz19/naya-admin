@@ -31,7 +31,7 @@ export async function getKpis(): Promise<DashboardKpis> {
     // fallback
   }
 
-  // Resilient real data calculation from server users/candidatures
+  // Exact real data calculation from server users/candidatures/posts
   const [stats, users, cands, posts] = await Promise.all([
     getUserStats(),
     getUsers(),
@@ -50,16 +50,8 @@ export async function getKpis(): Promise<DashboardKpis> {
   ).length;
   const acceptees = cands.filter((c: any) => c.statut === 'acceptee').length;
   
-  // AI usage based on real diagnostics and generation features
-  let totalAiCalls = 0;
-  for (const u of users) {
-    if (u.diagnostic_vie_completed) totalAiCalls += 2;
-    if (u.diagnostic_pro_completed) totalAiCalls += 3;
-    if (u.cv_generated) totalAiCalls += 1;
-    if (u.linkedin_optimized) totalAiCalls += 1;
-  }
-  totalAiCalls = Math.max(totalAiCalls, totalUsers * 3, 24);
-  const totalAiCost = Math.round(totalAiCalls * 0.038 * 100) / 100;
+  const totalAiCalls = 0;
+  const totalAiCost = 0;
   const reportedPosts = posts.filter((p: any) => (p.reports_count || 0) > 0 && !p.is_moderated).length;
 
   return {
@@ -106,65 +98,42 @@ export async function getRecentActivity(): Promise<ActivityItem[]> {
   const activities: ActivityItem[] = [];
   const userMap = new Map<string, string>();
 
+  // 1. Only real user joined events with actual created_at
   for (const user of users) {
     userMap.set(user.id, user.name);
 
-    activities.push({
-      id: `act-user-${user.id}`,
-      type: 'user_joined',
-      description: `${user.name} a rejoint Nayha`,
-      timestamp: user.created_at,
-      user_name: user.name,
-    });
-
-    if (user.ateliers_emploi_watched && user.ateliers_emploi_watched.length > 0) {
+    if (user.created_at) {
       activities.push({
-        id: `act-atelier-${user.id}`,
-        type: 'atelier_watched',
-        description: `${user.name} a visionné un atelier d'accompagnement`,
-        timestamp: user.last_active_at || user.created_at,
-        user_name: user.name,
-      });
-    }
-
-    if (user.cv_generated) {
-      activities.push({
-        id: `act-cv-${user.id}`,
-        type: 'ai_call',
-        description: `${user.name} a généré un CV avec l'IA`,
-        timestamp: user.last_active_at || user.created_at,
-        user_name: user.name,
-      });
-    }
-
-    if (user.diagnostic_vie_completed && user.diagnostic_pro_completed) {
-      activities.push({
-        id: `act-diag-${user.id}`,
+        id: `act-user-${user.id}`,
         type: 'user_joined',
-        description: `${user.name} a complété ses bilans diagnostiques`,
-        timestamp: user.last_active_at || user.created_at,
+        description: `${user.name} a rejoint Nayha`,
+        timestamp: user.created_at,
         user_name: user.name,
       });
     }
   }
 
+  // 2. Only real candidatures submitted
   for (const cand of cands) {
     const uName = cand.user_name || userMap.get(cand.user_id) || 'Une utilisatrice';
+    const ent = cand.entreprise ? `chez ${cand.entreprise}` : '';
+    const poste = (cand as any).poste ? `(${(cand as any).poste})` : '';
     activities.push({
       id: `act-cand-${cand.id}`,
       type: 'candidature_sent',
-      description: `${uName} a postulé chez ${cand.entreprise || 'Entreprise'}`,
+      description: `${uName} a postulé ${ent} ${poste}`.trim(),
       timestamp: cand.date_envoi || (cand as any).created_at || new Date().toISOString(),
       user_name: uName,
     });
   }
 
+  // 3. Only real posts created in community
   for (const post of posts) {
     const author = post.auteur || userMap.get(post.user_id) || 'Une utilisatrice';
     activities.push({
       id: `act-post-${post.id}`,
       type: 'post_created',
-      description: `${author} a publié dans la communauté`,
+      description: `${author} a publié dans la communauté : "${post.contenu?.slice(0, 50) || 'Message'}"`,
       timestamp: post.created_at || new Date().toISOString(),
       user_name: author,
     });
@@ -201,9 +170,10 @@ export async function getSparklineData(): Promise<{
     // fallback
   }
 
-  const [users, cands] = await Promise.all([
+  const [users, cands, posts] = await Promise.all([
     getUsers(),
     getCandidatures().catch(() => []),
+    getPosts().catch(() => []),
   ]);
 
   const days: string[] = [];
@@ -213,46 +183,36 @@ export async function getSparklineData(): Promise<{
     days.push(d.toISOString().slice(0, 10));
   }
 
-  const usersPerDay = days.map((date, idx) => {
-    const real = users.filter((u) => (u.created_at || '').slice(0, 10) === date).length;
-    return {
-      date,
-      value: real > 0 ? real : (idx % 4 === 0 ? 2 : 1),
-    };
-  });
-
-  const candidaturesPerDay = days.map((date, idx) => {
-    const real = cands.filter((c: any) => ((c.date_envoi || c.created_at) || '').slice(0, 10) === date).length;
-    return {
-      date,
-      value: real > 0 ? real : (idx % 3 === 0 ? 3 : 1),
-    };
-  });
-
-  const aiCallsPerDay = days.map((date, idx) => {
-    const active = users.filter((u) => (u.last_active_at || '').slice(0, 10) === date).length;
-    return {
-      date,
-      value: active > 0 ? active * 4 : (idx % 2 === 0 ? 4 : 2),
-    };
-  });
-
-  const costPerDay = aiCallsPerDay.map((pt) => ({
-    date: pt.date,
-    value: Math.round(pt.value * 0.038 * 100) / 100,
+  const usersPerDay = days.map((date) => ({
+    date,
+    value: users.filter((u) => (u.created_at || '').slice(0, 10) === date).length,
   }));
 
-  const activityPerDay = days.map((date, idx) => {
+  const candidaturesPerDay = days.map((date) => ({
+    date,
+    value: cands.filter((c: any) => ((c.date_envoi || c.created_at) || '').slice(0, 10) === date).length,
+  }));
+
+  const aiCallsPerDay = days.map((date) => ({
+    date,
+    value: 0,
+  }));
+
+  const costPerDay = days.map((date) => ({
+    date,
+    value: 0,
+  }));
+
+  const activityPerDay = days.map((date) => {
     const uCount = users.filter((u) => (u.created_at || '').slice(0, 10) === date).length;
     const cCount = cands.filter((c: any) => ((c.date_envoi || c.created_at) || '').slice(0, 10) === date).length;
-    const actCount = users.filter((u) => (u.last_active_at || '').slice(0, 10) === date).length;
-    const dynamicTotal = (uCount * 3) + (cCount * 4) + (actCount * 5);
-    const wave = Math.round(Math.sin((idx + 2) * 0.6) * 5 + 14);
+    const pCount = posts.filter((p: any) => (p.created_at || '').slice(0, 10) === date).length;
     return {
       date,
-      value: Math.max(dynamicTotal, wave),
+      value: uCount + cCount + pCount,
     };
   });
 
   return { activityPerDay, usersPerDay, candidaturesPerDay, aiCallsPerDay, costPerDay };
 }
+

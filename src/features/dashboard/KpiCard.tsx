@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn';
 interface KpiCardProps {
   label: string;
   value: string;
-  delta: number;
+  delta?: number;
   icon: ElementType;
   sparklineData?: { value: number }[];
   sparklineColor?: string;
@@ -21,7 +21,7 @@ export function KpiCard({
   sparklineData,
   sparklineColor,
 }: KpiCardProps) {
-  const isPositive = delta >= 0;
+  const isPositive = delta !== undefined ? delta >= 0 : true;
 
   return (
     <Card noPadding className="overflow-hidden">
@@ -37,22 +37,24 @@ export function KpiCard({
             </span>
           </div>
 
-          <span
-            className={cn(
-              'inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium',
-              isPositive
-                ? 'bg-green-light text-green'
-                : 'bg-danger-light text-danger',
-            )}
-          >
-            {isPositive ? (
-              <TrendingUp size={12} />
-            ) : (
-              <TrendingDown size={12} />
-            )}
-            {isPositive ? '+' : ''}
-            {delta}%
-          </span>
+          {typeof delta === 'number' && (
+            <span
+              className={cn(
+                'inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium',
+                isPositive
+                  ? 'bg-green-light text-green'
+                  : 'bg-danger-light text-danger',
+              )}
+            >
+              {isPositive ? (
+                <TrendingUp size={12} />
+              ) : (
+                <TrendingDown size={12} />
+              )}
+              {isPositive ? '+' : ''}
+              {delta}%
+            </span>
+          )}
         </div>
 
         {/* Label */}
