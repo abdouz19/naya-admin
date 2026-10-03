@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Users, Activity, Briefcase, Brain } from 'lucide-react';
+import { Users, Activity, Briefcase, CreditCard } from 'lucide-react';
 import { Card, Spinner } from '@/components/ui';
 import { LineChart } from '@/components/charts';
 import { useService } from '@/hooks/use-service';
@@ -11,7 +11,7 @@ import {
   type ActivityItem,
   type SparklinePoint,
 } from '@/services/dashboard.service';
-import { formatNumber, formatCurrency, CHART_COLORS } from '@/lib/format';
+import { formatNumber, CHART_COLORS } from '@/lib/format';
 import { KpiCard } from './KpiCard';
 import { RecentActivity } from './RecentActivity';
 
@@ -66,11 +66,10 @@ export default function DashboardPage() {
           sparklineColor={CHART_COLORS.green}
         />
         <KpiCard
-          label="Cout IA ce mois"
-          value={formatCurrency(kpis?.totalAiCost ?? 0)}
-          icon={Brain}
-          sparklineData={sparklines?.costPerDay}
-          sparklineColor={CHART_COLORS.danger}
+          label="Abonnements actifs"
+          value={formatNumber(kpis?.paidUsers ?? 0)}
+          icon={CreditCard}
+          sparklineColor={CHART_COLORS.rose}
         />
       </div>
 
