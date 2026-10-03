@@ -1,5 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import LoginPage from '@/features/auth/LoginPage';
 import DashboardPage from '@/features/dashboard/DashboardPage';
 import UsersPage from '@/features/users/UsersPage';
 import CandidaturesPage from '@/features/candidatures/CandidaturesPage';
@@ -12,17 +14,26 @@ import SettingsPage from '@/features/settings/SettingsPage';
 
 export const router = createBrowserRouter([
   {
-    element: <AppLayout />,
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    element: <ProtectedRoute />,
     children: [
-      { index: true, element: <DashboardPage /> },
-      { path: 'utilisatrices', element: <UsersPage /> },
-      { path: 'candidatures', element: <CandidaturesPage /> },
-      { path: 'ia', element: <AiUsagePage /> },
-      { path: 'ateliers', element: <AteliersPage /> },
-      { path: 'blog', element: <BlogAdminPage /> },
-      { path: 'communaute', element: <CommunityPage /> },
-      { path: 'abonnements', element: <SubscriptionsPage /> },
-      { path: 'reglages', element: <SettingsPage /> },
+      {
+        element: <AppLayout />,
+        children: [
+          { index: true, element: <DashboardPage /> },
+          { path: 'utilisatrices', element: <UsersPage /> },
+          { path: 'candidatures', element: <CandidaturesPage /> },
+          { path: 'ia', element: <AiUsagePage /> },
+          { path: 'ateliers', element: <AteliersPage /> },
+          { path: 'blog', element: <BlogAdminPage /> },
+          { path: 'communaute', element: <CommunityPage /> },
+          { path: 'abonnements', element: <SubscriptionsPage /> },
+          { path: 'reglages', element: <SettingsPage /> },
+        ],
+      },
     ],
   },
 ]);

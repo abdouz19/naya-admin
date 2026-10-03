@@ -11,23 +11,40 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
+  LogOut,
 } from 'lucide-react';
 import { useSidebar } from '@/hooks/use-sidebar';
+import { useAuth } from '@/context/AuthContext';
+import { Avatar } from '@/components/ui';
 import { SidebarNavItem } from './SidebarNavItem';
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', to: '/' },
-  { icon: Users, label: 'Utilisatrices', to: '/utilisatrices' },
-  { icon: Briefcase, label: 'Candidatures', to: '/candidatures' },
-  { icon: Brain, label: 'IA', to: '/ia' },
-  { icon: PlayCircle, label: 'Ateliers', to: '/ateliers' },
-  { icon: BookOpen, label: 'Blog & Conseils', to: '/blog' },
-  { icon: MessageSquare, label: 'Communauté', to: '/communaute' },
-  { icon: CreditCard, label: 'Abonnements', to: '/abonnements' },
+  { icon: LayoutDashboard, label: 'Dashboard', to: '/', perm: 'dashboard' },
+  { icon: Users, label: 'Utilisatrices', to: '/utilisatrices', perm: 'users_view' },
+  { icon: Briefcase, label: 'Candidatures', to: '/candidatures', perm: 'candidatures_view' },
+  { icon: Brain, label: 'IA', to: '/ia', perm: 'ai_view' },
+  { icon: PlayCircle, label: 'Ateliers', to: '/ateliers', perm: 'ateliers_view' },
+  { icon: BookOpen, label: 'Blog & Conseils', to: '/blog', perm: 'community_view' },
+  { icon: MessageSquare, label: 'Communauté', to: '/communaute', perm: 'community_view' },
+  { icon: CreditCard, label: 'Abonnements', to: '/abonnements', perm: 'subscriptions_view' },
 ];
 
 export function Sidebar() {
   const { collapsed, toggle } = useSidebar();
+  const { user, logout, permissions } = useAuth();
+
+  const visibleNavItems = navItems.filter((item) => {
+    if (!item.perm) return true;
+    if (permissions && typeof permissions[item.perm] === 'boolean') {
+      return permissions[item.perm];
+    }
+    return true;
+  });
+
+  const canViewSettings =
+    !permissions ||
+    typeof permissions.settings_view !== 'boolean' ||
+    permissions.settings_view;
 
   return (
     <motion.aside
@@ -59,7 +76,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 flex flex-col gap-1 px-2 py-4 overflow-y-auto">
-        {navItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <SidebarNavItem
             key={item.to}
             icon={item.icon}
@@ -76,17 +93,47 @@ export function Sidebar() {
         <div className="mx-2 mb-2 border-t border-white/10" />
 
         {/* Settings */}
-        <SidebarNavItem
-          icon={Settings}
-          label="Réglages"
-          to="/reglages"
-          collapsed={collapsed}
-        />
+        {canViewSettings && (
+          <SidebarNavItem
+            icon={Settings}
+            label="Réglages"
+            to="/reglages"
+            collapsed={collapsed}
+          />
+        )}
+
+        {/* Current user & logout */}
+        {user && (
+          <div
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/5 mx-1 mb-1 ${
+              collapsed ? 'justify-center px-0' : ''
+            }`}
+          >
+            <Avatar name={user.name} size="sm" />
+            {!collapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-cream truncate">
+                  {user.name}
+                </p>
+                <p className="text-[10px] text-cream/50 capitalize truncate">
+                  {user.role.replace('_', ' ')}
+                </p>
+              </div>
+            )}
+            <button
+              onClick={logout}
+              title="Se déconnecter"
+              className="text-cream/50 hover:text-rose transition-colors cursor-pointer p-1"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        )}
 
         {/* Collapse toggle */}
         <button
           onClick={toggle}
-          className="flex items-center gap-3 px-4 py-2.5 rounded-r-lg text-cream/50 hover:text-white hover:bg-white/5 transition-all duration-200 cursor-pointer"
+          className="flex items-center gap-3 px-4 py-2 rounded-r-lg text-cream/50 hover:text-white hover:bg-white/5 transition-all duration-200 cursor-pointer"
           style={collapsed ? { justifyContent: 'center', paddingInline: 0 } : undefined}
           aria-label={collapsed ? 'Ouvrir le menu' : 'Réduire le menu'}
         >
