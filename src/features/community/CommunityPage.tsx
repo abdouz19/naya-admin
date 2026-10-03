@@ -1,14 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Spinner, Tabs, Modal, Button } from '@/components/ui';
 import { useService } from '@/hooks/use-service';
-import { getPosts } from '@/services/community.service';
+import { getPosts, moderatePost, deletePost } from '@/services/community.service';
 import type { CommunityPost } from '@/types/community';
 import { PostCard } from './PostCard';
 import { ReportsList } from './ReportsList';
 
 export default function CommunityPage() {
   const postsFn = useCallback(() => getPosts(), []);
-  const { data: fetchedPosts, loading } = useService<CommunityPost[]>(postsFn);
+  const { data: fetchedPosts, loading, refetch } = useService<CommunityPost[]>(postsFn);
 
   const [posts, setPosts] = useState<CommunityPost[] | null>(null);
   const [activeTab, setActiveTab] = useState('all');
@@ -27,27 +27,40 @@ export default function CommunityPage() {
   }
 
   const reportedPosts = useMemo(
-    () => currentPosts.filter((p) => p.reports_count > 0),
+    () => currentPosts.filter((p) => (p.reports_count ?? 0) > 0),
     [currentPosts],
   );
 
-  const handleModerate = useCallback((id: string) => {
+  const handleModerate = useCallback(async (id: string) => {
     setPosts((prev) =>
       (prev ?? []).map((p) =>
         p.id === id ? { ...p, is_moderated: !p.is_moderated } : p,
       ),
     );
-  }, []);
+    try {
+      await moderatePost(id);
+      refetch();
+    } catch (e) {
+      console.error(e);
+    }
+  }, [refetch]);
 
   const handleDeleteRequest = useCallback((id: string) => {
     setDeleteTarget(id);
   }, []);
 
-  const handleDeleteConfirm = useCallback(() => {
+  const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
-    setPosts((prev) => (prev ?? []).filter((p) => p.id !== deleteTarget));
+    const targetId = deleteTarget;
+    setPosts((prev) => (prev ?? []).filter((p) => p.id !== targetId));
     setDeleteTarget(null);
-  }, [deleteTarget]);
+    try {
+      await deletePost(targetId);
+      refetch();
+    } catch (e) {
+      console.error(e);
+    }
+  }, [deleteTarget, refetch]);
 
   const tabs = useMemo(
     () => [
