@@ -1,4 +1,4 @@
-import { Heart, Flag, EyeOff, Eye, Trash2 } from 'lucide-react';
+import { Heart, Flag, EyeOff, Eye, Trash2, MessageSquare } from 'lucide-react';
 import { Card, Avatar, Badge, Button } from '@/components/ui';
 import { formatRelative } from '@/lib/format';
 import type { CommunityPost } from '@/types/community';
@@ -52,11 +52,15 @@ export function PostCard({ post, onModerate, onDelete }: PostCardProps) {
       {/* Body */}
       <p className="text-sm text-ink line-clamp-3">{post.contenu}</p>
 
-      {/* Footer: reactions + reports */}
+      {/* Footer: reactions + comments + reports */}
       <div className="flex items-center gap-4 text-xs text-muted">
         <span className="inline-flex items-center gap-1">
           <Heart size={13} />
           {post.reactions_count}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <MessageSquare size={13} />
+          {post.comments_count ?? 0}
         </span>
         {post.reports_count > 0 && (
           <span className="inline-flex items-center gap-1 text-danger font-medium">

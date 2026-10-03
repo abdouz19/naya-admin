@@ -8,6 +8,7 @@ export interface CommunityPost {
   contenu: string;
   type: PostType;
   reactions_count: number;
+  comments_count?: number;
   is_moderated: boolean;
   created_at: string;
   reports_count: number;
