@@ -1,11 +1,18 @@
 export interface AtelierVideo {
   id: string;
   palier: string;
-  palier_label: string;
+  palier_label?: string;
+  category?: string;
   titre: string;
+  subtitle?: string;
   duree: string;
   description: string;
   video_url?: string;
+  tips?: string[];
+  icon?: string;
+  accent_color?: string;
+  order?: number;
+  is_active?: boolean;
 }
 
 export interface AtelierWatchRecord {
@@ -19,8 +26,10 @@ export interface AtelierStats {
   id: string;
   titre: string;
   palier: string;
+  category?: string;
   duree: string;
   watch_count: number;
   unique_viewers: number;
   completion_rate: number;
 }
+

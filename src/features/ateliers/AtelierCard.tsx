@@ -1,4 +1,4 @@
-import { Eye, Users } from 'lucide-react';
+import { Eye, Users, Video } from 'lucide-react';
 import { Card, Badge, ProgressBar } from '@/components/ui';
 import { formatNumber, formatPercent } from '@/lib/format';
 import type { AtelierStats } from '@/types/atelier';
@@ -13,14 +13,31 @@ function getProgressColor(rate: number): 'green' | 'gold' | 'danger' {
   return 'danger';
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  emploi: 'Emploi',
+  reconversion: 'Reconversion',
+  activite: 'Activité',
+  palier_1: 'Palier 1',
+  palier_2: 'Palier 2',
+  palier_3: 'Palier 3',
+};
+
 export function AtelierCard({ stats }: AtelierCardProps) {
+  const categoryLabel =
+    (stats.category && CATEGORY_LABELS[stats.category]) ||
+    CATEGORY_LABELS[stats.palier] ||
+    stats.palier;
+
   return (
-    <Card className="p-4 space-y-3">
+    <Card className="p-4 space-y-3 hover:border-rose/40 transition-colors">
       {/* Title + badges */}
       <div>
-        <p className="text-sm font-medium text-brown truncate">{stats.titre}</p>
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm font-medium text-brown truncate flex-1">{stats.titre}</p>
+          <Video size={15} className="text-rose shrink-0 mt-0.5" />
+        </div>
         <div className="mt-1.5 flex items-center gap-2">
-          <Badge variant="gold">{stats.palier}</Badge>
+          <Badge variant="gold">{categoryLabel}</Badge>
           <Badge variant="muted">{stats.duree}</Badge>
         </div>
       </div>
