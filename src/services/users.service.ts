@@ -1,15 +1,38 @@
 import { mockUsers } from '@/data/mock-users';
 import type { UserProfile } from '@/types/user';
 
-const delay = <T>(data: T): Promise<T> =>
-  new Promise((resolve) => setTimeout(() => resolve(data), 120));
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
 
-export function getUsers(): Promise<UserProfile[]> {
-  return delay([...mockUsers]);
+let inMemoryUsers = [...mockUsers];
+
+export async function getUsers(): Promise<UserProfile[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/users/admin/all`);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        inMemoryUsers = data;
+        return data;
+      }
+    }
+  } catch (_) {
+    // fallback
+  }
+  return [...inMemoryUsers];
 }
 
-export function getUserById(id: string): Promise<UserProfile | undefined> {
-  return delay(mockUsers.find((u) => u.id === id));
+export async function getUserById(id: string): Promise<UserProfile | undefined> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/users/admin/${id}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.id) return data;
+    }
+  } catch (_) {
+    // fallback
+  }
+  return inMemoryUsers.find((u) => u.id === id);
 }
 
 export interface UserStats {
@@ -19,30 +42,71 @@ export interface UserStats {
   diagnosticCompleted: number;
 }
 
-export function getUserStats(): Promise<UserStats> {
-  const now = new Date('2026-08-26T12:00:00Z').getTime();
+export async function getUserStats(): Promise<UserStats> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/users/admin/stats`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.total === 'number') return data;
+    }
+  } catch (_) {
+    // fallback
+  }
+
+  const users = await getUsers();
+  const now = Date.now();
   const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
 
-  const total = mockUsers.length;
-  const activeThisWeek = mockUsers.filter(
-    (u) => now - new Date(u.last_active_at).getTime() < oneWeekMs
+  const total = users.length;
+  const activeThisWeek = users.filter(
+    (u) => now - new Date(u.last_active_at).getTime() < oneWeekMs,
   ).length;
-  const paidUsers = mockUsers.filter((u) => u.has_paid).length;
-  const diagnosticCompleted = mockUsers.filter(
-    (u) => u.diagnostic_vie_completed && u.diagnostic_pro_completed
+  const paidUsers = users.filter((u) => u.has_paid).length;
+  const diagnosticCompleted = users.filter(
+    (u) => u.diagnostic_vie_completed && u.diagnostic_pro_completed,
   ).length;
 
-  return delay({ total, activeThisWeek, paidUsers, diagnosticCompleted });
+  return { total, activeThisWeek, paidUsers, diagnosticCompleted };
 }
 
-export function blockUser(id: string): Promise<UserProfile | undefined> {
-  const user = mockUsers.find((u) => u.id === id);
+export async function blockUser(id: string): Promise<UserProfile | undefined> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/users/admin/${id}/block`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_blocked: true }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const idx = inMemoryUsers.findIndex((u) => u.id === id);
+      if (idx !== -1) inMemoryUsers[idx] = data;
+      return data;
+    }
+  } catch (_) {
+    // fallback
+  }
+  const user = inMemoryUsers.find((u) => u.id === id);
   if (user) (user as any).is_blocked = true;
-  return delay(user);
+  return user;
 }
 
-export function unblockUser(id: string): Promise<UserProfile | undefined> {
-  const user = mockUsers.find((u) => u.id === id);
+export async function unblockUser(id: string): Promise<UserProfile | undefined> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/users/admin/${id}/block`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_blocked: false }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const idx = inMemoryUsers.findIndex((u) => u.id === id);
+      if (idx !== -1) inMemoryUsers[idx] = data;
+      return data;
+    }
+  } catch (_) {
+    // fallback
+  }
+  const user = inMemoryUsers.find((u) => u.id === id);
   if (user) (user as any).is_blocked = false;
-  return delay(user);
+  return user;
 }
