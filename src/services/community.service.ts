@@ -1,53 +1,41 @@
-import { mockPosts, mockReports } from '@/data/mock-community';
 import type { CommunityPost, CommunityReport } from '@/types/community';
+import { supabaseRest } from '@/lib/supabase-client';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
 
-let inMemoryPosts = [...mockPosts];
-let inMemoryReports = [...mockReports];
+let inMemoryPosts: CommunityPost[] = [];
+let inMemoryReports: CommunityReport[] = [];
 
 export async function getPosts(): Promise<CommunityPost[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/community/admin/posts`);
     if (res.ok) {
       const data = await res.json();
-      if (data && Array.isArray(data.posts)) {
+      if (data && Array.isArray(data.posts) && data.posts.length > 0) {
+        inMemoryPosts = data.posts;
         return data.posts;
       }
     }
   } catch (_) {
-    // fallback only on network error
+    // fallback
   }
-  return [...inMemoryPosts];
+
+  // Supabase direct fallback
+  const dbPosts = await supabaseRest<CommunityPost[]>('community_posts?select=*&order=created_at.desc');
+  if (dbPosts && Array.isArray(dbPosts) && dbPosts.length > 0) {
+    inMemoryPosts = dbPosts;
+    return dbPosts;
+  }
+
+  return inMemoryPosts;
 }
 
 export async function getReportedPosts(): Promise<
   { post: CommunityPost; reports: CommunityReport[] }[]
 > {
-  try {
-    const [postsRes, reportsRes] = await Promise.all([
-      fetch(`${API_BASE_URL}/community/admin/posts`),
-      fetch(`${API_BASE_URL}/community/admin/reports`),
-    ]);
-
-    if (postsRes.ok && reportsRes.ok) {
-      const postsData = await postsRes.json();
-      const reportsData = await reportsRes.json();
-      const posts: CommunityPost[] = postsData.posts ?? [];
-      const reports: CommunityReport[] = reportsData.reports ?? [];
-
-      const reported = posts.filter((p) => (p.reports_count ?? 0) > 0);
-      return reported.map((post) => ({
-        post,
-        reports: reports.filter((r) => r.post_id === post.id),
-      }));
-    }
-  } catch (_) {
-    // fallback only on network error
-  }
-
-  const reported = inMemoryPosts.filter((p) => (p.reports_count ?? 0) > 0);
+  const posts = await getPosts();
+  const reported = posts.filter((p) => (p.reports_count ?? 0) > 0);
   return reported.map((post) => ({
     post,
     reports: inMemoryReports.filter((r) => r.post_id === post.id),

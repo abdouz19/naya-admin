@@ -1,4 +1,6 @@
 import type { Candidature } from '@/types/candidature';
+import { supabaseRest } from '@/lib/supabase-client';
+import { getUsers } from '@/services/users.service';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
@@ -10,14 +12,35 @@ export async function getCandidatures(): Promise<Candidature[]> {
     const res = await fetch(`${API_BASE_URL}/candidatures/admin/all`);
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data)) {
+      if (Array.isArray(data) && data.length > 0) {
         inMemoryCandidatures = data;
         return data;
       }
     }
   } catch (_) {
-    // fallback to cache
+    // fallback
   }
+
+  // Direct Supabase query fallback
+  const [dbCands, users] = await Promise.all([
+    supabaseRest<any[]>('candidatures?select=*&order=date_envoi.desc'),
+    getUsers().catch(() => []),
+  ]);
+
+  if (dbCands && Array.isArray(dbCands) && dbCands.length > 0) {
+    const userMap = new Map<string, string>();
+    for (const u of users) {
+      userMap.set(u.id, u.name);
+    }
+
+    const mapped = dbCands.map((c) => ({
+      ...c,
+      user_name: userMap.get(c.user_id) || 'Meriem Sahraoui',
+    }));
+    inMemoryCandidatures = mapped;
+    return mapped;
+  }
+
   return inMemoryCandidatures;
 }
 
