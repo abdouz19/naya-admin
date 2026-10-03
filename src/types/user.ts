@@ -10,7 +10,8 @@ export interface UserProfile {
   metier_selected: boolean;
   has_paid: boolean;
   selected_metier_titre: string;
-  parcours_type: 'retour_emploi' | 'reconversion' | 'creation_activite' | null;
+  parcours_type: string | null;
+  parcours_types?: string[];
   parcours_analyse_completed: boolean;
   parcours_first_candidature_completed: boolean;
   ateliers_emploi_watched: string[];

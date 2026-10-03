@@ -8,10 +8,12 @@ interface UserRowProps {
   onClick: (user: UserProfile) => void;
 }
 
-const PARCOURS_LABELS: Record<string, string> = {
-  retour_emploi: 'Retour emploi',
-  reconversion: 'Reconversion',
-  creation_activite: "Creation d'activite",
+const PARCOURS_CONFIG: Record<string, { label: string; variant: 'rose' | 'gold' | 'green' | 'muted' }> = {
+  retour_emploi: { label: 'Retour emploi', variant: 'rose' },
+  retouremploi: { label: 'Retour emploi', variant: 'rose' },
+  reconversion: { label: 'Reconversion', variant: 'gold' },
+  creation_activite: { label: "Création d'activité", variant: 'green' },
+  creationactivite: { label: "Création d'activité", variant: 'green' },
 };
 
 function DiagnosticBadge({ user }: { user: UserProfile }) {
@@ -35,6 +37,13 @@ function DiagnosticBadge({ user }: { user: UserProfile }) {
 }
 
 export function UserRow({ user, onClick }: UserRowProps) {
+  const activeList =
+    user.parcours_types && user.parcours_types.length > 0
+      ? user.parcours_types
+      : user.parcours_type
+      ? [user.parcours_type]
+      : [];
+
   return (
     <Table.Row clickable onClick={() => onClick(user)}>
       <Table.Cell>
@@ -52,8 +61,18 @@ export function UserRow({ user, onClick }: UserRowProps) {
       </Table.Cell>
 
       <Table.Cell>
-        {user.parcours_type ? (
-          <Badge variant="rose">{PARCOURS_LABELS[user.parcours_type]}</Badge>
+        {activeList.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {activeList.map((p) => {
+              const key = p.toLowerCase().replace(/[^a-z]/g, '');
+              const conf = PARCOURS_CONFIG[key] || { label: p, variant: 'rose' as const };
+              return (
+                <Badge key={p} variant={conf.variant}>
+                  {conf.label}
+                </Badge>
+              );
+            })}
+          </div>
         ) : (
           <span className="text-muted">&mdash;</span>
         )}

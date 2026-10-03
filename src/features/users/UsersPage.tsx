@@ -86,8 +86,20 @@ export default function UsersPage() {
       if (paidFilter === 'free' && u.has_paid) return false;
 
       // Parcours filter
-      if (parcoursFilter !== 'all' && u.parcours_type !== parcoursFilter)
-        return false;
+      if (parcoursFilter !== 'all') {
+        const target = parcoursFilter.toLowerCase().replace(/[^a-z]/g, '');
+        const list = (
+          u.parcours_types && u.parcours_types.length > 0
+            ? u.parcours_types
+            : u.parcours_type
+            ? [u.parcours_type]
+            : []
+        ).map((p) => p.toLowerCase().replace(/[^a-z]/g, ''));
+
+        if (!list.some((p) => p.includes(target) || target.includes(p))) {
+          return false;
+        }
+      }
 
       return true;
     });

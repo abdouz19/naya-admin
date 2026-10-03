@@ -22,10 +22,12 @@ interface UserDetailPanelProps {
   onUserUpdated?: (user: UserProfile) => void;
 }
 
-const PARCOURS_LABELS: Record<string, string> = {
-  retour_emploi: 'Retour emploi',
-  reconversion: 'Reconversion',
-  creation_activite: "Creation d'activite",
+const PARCOURS_CONFIG: Record<string, { label: string; variant: 'rose' | 'gold' | 'green' | 'muted' }> = {
+  retour_emploi: { label: 'Retour emploi', variant: 'rose' },
+  retouremploi: { label: 'Retour emploi', variant: 'rose' },
+  reconversion: { label: 'Reconversion', variant: 'gold' },
+  creation_activite: { label: "Création d'activité", variant: 'green' },
+  creationactivite: { label: "Création d'activité", variant: 'green' },
 };
 
 function CheckItem({ label, checked }: { label: string; checked: boolean }) {
@@ -176,15 +178,39 @@ export function UserDetailPanel({ user, onClose, onUserUpdated }: UserDetailPane
 
                   <div className="flex items-center justify-between py-2">
                     <span className="text-sm text-brown">Type de parcours</span>
-                    {user.parcours_type ? (
-                      <Badge variant="rose">
-                        {PARCOURS_LABELS[user.parcours_type]}
-                      </Badge>
-                    ) : (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-muted">
-                        <XIcon size={12} />
-                      </span>
-                    )}
+                    {(() => {
+                      const list =
+                        user.parcours_types && user.parcours_types.length > 0
+                          ? user.parcours_types
+                          : user.parcours_type
+                          ? [user.parcours_type]
+                          : [];
+
+                      if (list.length === 0) {
+                        return (
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-muted">
+                            <XIcon size={12} />
+                          </span>
+                        );
+                      }
+
+                      return (
+                        <div className="flex flex-wrap justify-end gap-1">
+                          {list.map((p) => {
+                            const key = p.toLowerCase().replace(/[^a-z]/g, '');
+                            const conf = PARCOURS_CONFIG[key] || {
+                              label: p,
+                              variant: 'rose' as const,
+                            };
+                            return (
+                              <Badge key={p} variant={conf.variant}>
+                                {conf.label}
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   <CheckItem
