@@ -1,7 +1,8 @@
 import { mockBlogArticles } from '@/data/mock-blog';
 import type { BlogArticle, BlogStats } from '@/types/blog';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
 
 let inMemoryArticles = [...mockBlogArticles];
 
@@ -10,7 +11,7 @@ export async function getAdminBlogArticles(): Promise<BlogArticle[]> {
     const res = await fetch(`${API_BASE_URL}/blog/admin/articles`);
     if (res.ok) {
       const data = await res.json();
-      if (data && Array.isArray(data.articles) && data.articles.length > 0) {
+      if (data && Array.isArray(data.articles)) {
         return data.articles;
       }
     }

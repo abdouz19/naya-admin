@@ -1,7 +1,8 @@
 import { mockPosts, mockReports } from '@/data/mock-community';
 import type { CommunityPost, CommunityReport } from '@/types/community';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
 
 let inMemoryPosts = [...mockPosts];
 let inMemoryReports = [...mockReports];
@@ -11,12 +12,12 @@ export async function getPosts(): Promise<CommunityPost[]> {
     const res = await fetch(`${API_BASE_URL}/community/admin/posts`);
     if (res.ok) {
       const data = await res.json();
-      if (data && Array.isArray(data.posts) && data.posts.length > 0) {
+      if (data && Array.isArray(data.posts)) {
         return data.posts;
       }
     }
   } catch (_) {
-    // fallback
+    // fallback only on network error
   }
   return [...inMemoryPosts];
 }
@@ -43,10 +44,10 @@ export async function getReportedPosts(): Promise<
       }));
     }
   } catch (_) {
-    // fallback
+    // fallback only on network error
   }
 
-  const reported = inMemoryPosts.filter((p) => p.reports_count > 0);
+  const reported = inMemoryPosts.filter((p) => (p.reports_count ?? 0) > 0);
   return reported.map((post) => ({
     post,
     reports: inMemoryReports.filter((r) => r.post_id === post.id),
