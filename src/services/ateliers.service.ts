@@ -8,7 +8,9 @@ let inMemoryAteliers = [...mockAteliers];
 
 export async function getAteliers(): Promise<AtelierVideo[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/ateliers/admin/all`);
+    const res = await fetch(`${API_BASE_URL}/ateliers/admin/all`, {
+      cache: 'no-store',
+    });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data)) {
@@ -92,7 +94,9 @@ export async function deleteAtelier(id: string): Promise<boolean> {
 
 export async function getAtelierStats(): Promise<AtelierStats[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/ateliers/admin/stats`);
+    const res = await fetch(`${API_BASE_URL}/ateliers/admin/stats`, {
+      cache: 'no-store',
+    });
     if (res.ok) {
       const stats = await res.json();
       if (Array.isArray(stats) && stats.length > 0) return stats;
