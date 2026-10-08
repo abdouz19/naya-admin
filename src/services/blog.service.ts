@@ -8,10 +8,13 @@ let inMemoryArticles = [...mockBlogArticles];
 
 export async function getAdminBlogArticles(): Promise<BlogArticle[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/blog/admin/articles`);
+    const res = await fetch(`${API_BASE_URL}/blog/admin/articles`, {
+      cache: 'no-store',
+    });
     if (res.ok) {
       const data = await res.json();
       if (data && Array.isArray(data.articles)) {
+        inMemoryArticles = data.articles;
         return data.articles;
       }
     }
@@ -60,7 +63,10 @@ export async function createBlogArticle(
     });
     if (res.ok) {
       const data = await res.json();
-      if (data.article) return data.article;
+      if (data.article) {
+        inMemoryArticles.unshift(data.article);
+        return data.article;
+      }
     }
   } catch (_) {
     // fallback
@@ -90,7 +96,15 @@ export async function updateBlogArticle(
     });
     if (res.ok) {
       const data = await res.json();
-      if (data.article) return data.article;
+      if (data.article) {
+        const idx = inMemoryArticles.findIndex((a) => a.id === id);
+        if (idx !== -1) {
+          inMemoryArticles[idx] = data.article;
+        } else {
+          inMemoryArticles.unshift(data.article);
+        }
+        return data.article;
+      }
     }
   } catch (_) {
     // fallback
@@ -113,7 +127,10 @@ export async function deleteBlogArticle(id: string): Promise<boolean> {
     const res = await fetch(`${API_BASE_URL}/blog/admin/articles/${id}`, {
       method: 'DELETE',
     });
-    if (res.ok) return true;
+    if (res.ok) {
+      inMemoryArticles = inMemoryArticles.filter((a) => a.id !== id);
+      return true;
+    }
   } catch (_) {
     // fallback
   }
