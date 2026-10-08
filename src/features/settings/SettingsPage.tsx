@@ -14,10 +14,12 @@ import { AdminUserRow } from './AdminUserRow';
 import { AddAdminModal } from './AddAdminModal';
 import { EditAdminModal } from './EditAdminModal';
 import { RolePermissionsCard } from './RolePermissionsCard';
+import { AppLinksSettings } from './AppLinksSettings';
 
 const TABS = [
   { key: 'team', label: 'Équipe' },
   { key: 'roles', label: 'Rôles & Permissions' },
+  { key: 'links', label: 'Liens & Ressources' },
 ];
 
 export default function SettingsPage() {
@@ -169,6 +171,9 @@ export default function SettingsPage() {
           onUpdate={handleUpdatePermissions}
         />
       )}
+
+      {/* External App Links tab */}
+      {activeTab === 'links' && <AppLinksSettings />}
     </div>
   );
 }
