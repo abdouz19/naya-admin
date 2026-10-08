@@ -71,7 +71,8 @@ export function Modal({ open, onClose, title, className, children }: ModalProps)
             role="dialog"
             aria-modal
             className={cn(
-              'relative z-10 w-full max-w-md radius-lg bg-white p-6 shadow-modal',
+              'relative z-10 w-full radius-lg bg-white p-6 shadow-modal',
+              !className?.includes('max-w-') && 'max-w-md',
               className,
             )}
             variants={panelVariants}

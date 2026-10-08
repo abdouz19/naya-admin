@@ -359,13 +359,13 @@ export default function AteliersPage() {
         title={editingAtelier ? `Modifier l'atelier : ${editingAtelier.titre}` : 'Nouvel atelier vidéo'}
         className="max-w-2xl"
       >
-        <div className="space-y-4 max-h-[75vh] overflow-y-auto px-1 pr-2">
+        <div className="space-y-5 max-h-[75vh] overflow-y-auto px-1 pr-2">
           {/* Section 1: Informations Générales */}
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             <h3 className="text-xs font-semibold text-rose uppercase tracking-wider flex items-center gap-1.5">
               <Film size={14} /> Informations Générales
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <Input
                 label="Titre de l'atelier"
                 value={form.titre}
@@ -380,7 +380,7 @@ export default function AteliersPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <Select
                 label="Catégorie / Parcours"
                 options={CATEGORY_OPTIONS}
@@ -393,21 +393,30 @@ export default function AteliersPage() {
                 onChange={(e) => setForm({ ...form, step_tag: e.target.value })}
                 placeholder="ex: Candidatures & Veille"
               />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <Input
                 label="Durée (mm:ss)"
                 value={form.duree}
                 onChange={(e) => setForm({ ...form, duree: e.target.value })}
                 placeholder="ex: 12:30"
               />
+              <Input
+                label="Ordre d'affichage"
+                type="number"
+                value={form.order.toString()}
+                onChange={(e) => setForm({ ...form, order: parseInt(e.target.value, 10) || 1 })}
+              />
             </div>
           </div>
 
           {/* Section 2: Intervenant & Ressources */}
-          <div className="space-y-3 pt-3 border-t border-gray-100">
+          <div className="space-y-3.5 pt-3.5 border-t border-gray-100">
             <h3 className="text-xs font-semibold text-rose uppercase tracking-wider flex items-center gap-1.5">
               <User size={14} /> Intervenant(e) & Ressources
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <Input
                 label="Nom de l'intervenant(e)"
                 value={form.speaker_name}
@@ -432,26 +441,16 @@ export default function AteliersPage() {
           </div>
 
           {/* Section 3: Vidéo & Statut */}
-          <div className="space-y-3 pt-3 border-t border-gray-100">
+          <div className="space-y-3.5 pt-3.5 border-t border-gray-100">
             <h3 className="text-xs font-semibold text-rose uppercase tracking-wider flex items-center gap-1.5">
               <Video size={14} /> Vidéo YouTube & Diffusion
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="sm:col-span-2">
-                <Input
-                  label="Lien YouTube"
-                  value={form.video_url}
-                  onChange={(e) => setForm({ ...form, video_url: e.target.value })}
-                  placeholder="https://youtu.be/..."
-                />
-              </div>
-              <Input
-                label="Ordre d'affichage"
-                type="number"
-                value={form.order.toString()}
-                onChange={(e) => setForm({ ...form, order: parseInt(e.target.value, 10) || 1 })}
-              />
-            </div>
+            <Input
+              label="Lien YouTube"
+              value={form.video_url}
+              onChange={(e) => setForm({ ...form, video_url: e.target.value })}
+              placeholder="https://youtu.be/..."
+            />
 
             <div className="flex items-center gap-2 pt-1">
               <input
@@ -459,7 +458,7 @@ export default function AteliersPage() {
                 id="is_active_toggle"
                 checked={form.is_active}
                 onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                className="rounded border-gray-300 text-rose focus:ring-rose"
+                className="h-4 w-4 rounded border-gray-300 text-rose focus:ring-rose cursor-pointer"
               />
               <label htmlFor="is_active_toggle" className="text-sm font-medium text-brown cursor-pointer">
                 Atelier actif et visible dans l'application mobile
@@ -468,46 +467,46 @@ export default function AteliersPage() {
           </div>
 
           {/* Section 4: Contenu pédagogique & Conseils */}
-          <div className="space-y-3 pt-3 border-t border-gray-100">
+          <div className="space-y-3.5 pt-3.5 border-t border-gray-100">
             <h3 className="text-xs font-semibold text-rose uppercase tracking-wider flex items-center gap-1.5">
               <BookOpen size={14} /> Contenu pédagogique
             </h3>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-brown">
+            <div className="flex flex-col">
+              <label className="mb-1.5 text-sm font-medium text-muted">
                 Objectifs pédagogiques (1 par ligne)
               </label>
               <textarea
                 value={form.objectifs}
                 onChange={(e) => setForm({ ...form, objectifs: e.target.value })}
                 rows={3}
-                className="w-full rounded-md border border-gray-200 px-3 py-2 text-xs text-brown outline-none transition-colors focus:border-rose placeholder:text-muted"
+                className="w-full radius-sm border border-gray-300 bg-white px-3 py-2 text-sm text-ink placeholder:text-muted-light transition-colors focus:border-rose focus:ring-1 focus:ring-rose/30 focus:outline-none"
                 placeholder="Identifier les mots-clés stratégiques&#10;Configurer des alertes quotidiennes sans saturation&#10;Créer une routine efficace de candidature"
               />
             </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-brown">
+            <div className="flex flex-col">
+              <label className="mb-1.5 text-sm font-medium text-muted">
                 Conseils pratiques / Points clés (1 par ligne)
               </label>
               <textarea
                 value={form.tips}
                 onChange={(e) => setForm({ ...form, tips: e.target.value })}
                 rows={3}
-                className="w-full rounded-md border border-gray-200 px-3 py-2 text-xs text-brown outline-none transition-colors focus:border-rose placeholder:text-muted"
+                className="w-full radius-sm border border-gray-300 bg-white px-3 py-2 text-sm text-ink placeholder:text-muted-light transition-colors focus:border-rose focus:ring-1 focus:ring-rose/30 focus:outline-none"
                 placeholder="Utilise des mots-clés larges&#10;Choisis une fréquence quotidienne&#10;Crée une adresse email dédiée"
               />
             </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-brown">
+            <div className="flex flex-col">
+              <label className="mb-1.5 text-sm font-medium text-muted">
                 Description détaillée
               </label>
               <textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 rows={3}
-                className="w-full rounded-md border border-gray-200 px-3 py-2 text-xs text-brown outline-none transition-colors focus:border-rose placeholder:text-muted"
+                className="w-full radius-sm border border-gray-300 bg-white px-3 py-2 text-sm text-ink placeholder:text-muted-light transition-colors focus:border-rose focus:ring-1 focus:ring-rose/30 focus:outline-none"
                 placeholder="Description complète présentée sur la fiche de l'atelier..."
               />
             </div>
@@ -515,24 +514,26 @@ export default function AteliersPage() {
 
           {/* Action buttons */}
           <div className="flex items-center justify-between pt-4 border-t border-gray-100 sticky bottom-0 bg-white">
-            {editingAtelier ? (
-              <Button
-                variant="danger"
-                size="sm"
-                icon={<Trash2 size={14} />}
-                onClick={handleDelete}
-                loading={saving}
-              >
-                Supprimer
-              </Button>
-            ) : (
-              <div />
-            )}
-            <div className="flex gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setModalOpen(false)}>
+            <div>
+              {editingAtelier && (
+                <Button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  icon={<Trash2 size={14} />}
+                  onClick={handleDelete}
+                  loading={saving}
+                >
+                  Supprimer
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <Button type="button" variant="ghost" size="sm" onClick={() => setModalOpen(false)}>
                 Annuler
               </Button>
               <Button
+                type="button"
                 variant="primary"
                 size="sm"
                 onClick={handleSave}
