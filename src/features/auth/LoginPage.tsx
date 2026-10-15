@@ -5,24 +5,6 @@ import { Lock, Mail, Eye, EyeOff, AlertCircle, ShieldCheck, ArrowRight } from 'l
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui';
 
-const DEMO_ACCOUNTS = [
-  {
-    name: 'Meriem Boussaïd',
-    email: 'meriem@nayha.fr',
-    role: 'Super Admin',
-  },
-  {
-    name: 'Abderraouf Zouaid',
-    email: 'abderraouf@progix.dev',
-    role: 'Administrateur',
-  },
-  {
-    name: 'Sarah Benali',
-    email: 'sarah@nayha.fr',
-    role: 'Modératrice',
-  },
-];
-
 export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -60,12 +42,6 @@ export default function LoginPage() {
     } else {
       setError(res.error || 'Identifiants invalides');
     }
-  };
-
-  const fillDemo = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('nayha2026');
-    setError(null);
   };
 
   return (
@@ -168,33 +144,6 @@ export default function LoginPage() {
               </Button>
             </div>
           </form>
-
-          {/* Demo Quick Accounts */}
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3 text-center">
-              Comptes de démonstration
-            </p>
-            <div className="space-y-2">
-              {DEMO_ACCOUNTS.map((acc) => (
-                <button
-                  key={acc.email}
-                  type="button"
-                  onClick={() => fillDemo(acc.email)}
-                  className="w-full flex items-center justify-between p-2.5 rounded-lg border border-gray-100 bg-gray-50/50 hover:bg-rose/5 hover:border-rose/30 transition-all text-left cursor-pointer group"
-                >
-                  <div>
-                    <p className="text-xs font-medium text-brown group-hover:text-rose transition-colors">
-                      {acc.name}
-                    </p>
-                    <p className="text-[11px] text-muted">{acc.email}</p>
-                  </div>
-                  <span className="text-[11px] font-medium text-muted px-2 py-0.5 bg-white rounded border border-gray-200">
-                    {acc.role}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Footer info */}

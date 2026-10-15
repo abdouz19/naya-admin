@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               JSON.stringify(data.permissions || {}),
             );
           }
-        } else if (res.status === 401) {
+        } else if (res.status === 401 || res.status === 403) {
           logout();
         }
       } catch (_) {
