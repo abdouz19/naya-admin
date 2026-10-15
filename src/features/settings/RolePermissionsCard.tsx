@@ -54,6 +54,10 @@ const PERMISSION_SECTIONS: PermissionSection[] = [
     ],
   },
   {
+    label: 'Support',
+    keys: [{ key: 'support', label: 'Traiter les demandes de support' }],
+  },
+  {
     label: 'Abonnements',
     keys: [
       { key: 'subscriptions_view', label: 'Voir les abonnements' },
