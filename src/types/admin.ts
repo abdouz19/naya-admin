@@ -45,6 +45,7 @@ export interface RolePermissions {
     ateliers_edit: boolean;
     community_view: boolean;
     community_moderate: boolean;
+    support: boolean;
     subscriptions_view: boolean;
     subscriptions_edit: boolean;
     settings_view: boolean;

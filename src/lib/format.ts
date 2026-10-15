@@ -39,3 +39,18 @@ export const CHART_COLORS = {
   gray300: '#C7D1D9',
   gray200: '#E2E8EE',
 } as const;
+
+export function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString('fr-FR', {
+    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+  });
+}
+
+/** Compact duration since `iso`, e.g. "12 min", "3 h", "2 j". */
+export function formatElapsed(iso: string): string {
+  const mins = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
+  if (mins < 60) return `${Math.max(1, mins)} min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} h`;
+  return `${Math.floor(hours / 24)} j`;
+}

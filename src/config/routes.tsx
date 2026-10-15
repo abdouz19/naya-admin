@@ -9,6 +9,7 @@ import AiUsagePage from '@/features/ai-usage/AiUsagePage';
 import AteliersPage from '@/features/ateliers/AteliersPage';
 import BlogAdminPage from '@/features/blog/BlogAdminPage';
 import CommunityPage from '@/features/community/CommunityPage';
+import SupportPage from '@/features/support/SupportPage';
 import SubscriptionsPage from '@/features/subscriptions/SubscriptionsPage';
 import SettingsPage from '@/features/settings/SettingsPage';
 
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
           { path: 'ateliers', element: <AteliersPage /> },
           { path: 'blog', element: <BlogAdminPage /> },
           { path: 'communaute', element: <CommunityPage /> },
+          { path: 'support', element: <SupportPage /> },
           { path: 'abonnements', element: <SubscriptionsPage /> },
           { path: 'reglages', element: <SettingsPage /> },
         ],

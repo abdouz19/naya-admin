@@ -12,6 +12,7 @@ const routeTitles: Record<string, string> = {
   '/ia': 'Intelligence artificielle',
   '/ateliers': 'Ateliers vidéo',
   '/communaute': 'Communauté',
+  '/support': 'Support',
   '/abonnements': 'Abonnements',
   '/reglages': 'Réglages',
 };

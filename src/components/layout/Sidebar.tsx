@@ -7,6 +7,7 @@ import {
   BookOpen,
   MessageSquare,
   CreditCard,
+  LifeBuoy,
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { useAuth } from '@/context/AuthContext';
+import { useSupportWaitingCount } from '@/hooks/use-support-waiting-count';
 import { Avatar } from '@/components/ui';
 import { SidebarNavItem } from './SidebarNavItem';
 
@@ -24,12 +26,13 @@ const navItems = [
   { icon: PlayCircle, label: 'Ateliers', to: '/ateliers', perm: 'ateliers_view' },
   { icon: BookOpen, label: 'Blog & Conseils', to: '/blog', perm: 'community_view' },
   { icon: MessageSquare, label: 'Communauté', to: '/communaute', perm: 'community_view' },
+  { icon: LifeBuoy, label: 'Support', to: '/support', perm: 'support' },
   { icon: CreditCard, label: 'Abonnements', to: '/abonnements', perm: 'subscriptions_view' },
 ];
 
 export function Sidebar() {
   const { collapsed, toggle } = useSidebar();
-  const { user, logout, permissions } = useAuth();
+  const { user, token, logout, permissions } = useAuth();
 
   const visibleNavItems = navItems.filter((item) => {
     if (!item.perm) return true;
@@ -38,6 +41,9 @@ export function Sidebar() {
     }
     return true;
   });
+
+  const canViewSupport = visibleNavItems.some((item) => item.to === '/support');
+  const supportWaiting = useSupportWaitingCount(token, canViewSupport);
 
   const canViewSettings =
     !permissions ||
@@ -81,6 +87,7 @@ export function Sidebar() {
             label={item.label}
             to={item.to}
             collapsed={collapsed}
+            badge={item.to === '/support' ? supportWaiting : undefined}
           />
         ))}
       </nav>
