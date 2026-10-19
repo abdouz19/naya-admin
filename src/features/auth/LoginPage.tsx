@@ -159,7 +159,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-2 w-full cursor-pointer rounded-xl bg-brown py-3.5 text-[15px] font-medium text-white transition-colors hover:bg-brown-light disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-2 h-14 w-full cursor-pointer rounded-3xl bg-rose text-base font-semibold text-white transition-colors hover:bg-rose-dark disabled:cursor-not-allowed disabled:bg-gray-300"
               >
                 {loading ? 'Connexion…' : 'Se connecter'}
               </button>
