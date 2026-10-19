@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { CreditCard, Euro, RefreshCcw, UserCheck, UserMinus, UserX } from '@/components/icons';
 import {
   Avatar,
@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   EmptyState,
+  Pagination,
   ProgressBar,
   SearchInput,
   Spinner,
@@ -20,10 +21,11 @@ import {
   PARCOURS_LABELS,
   STORE_LABELS,
   type AdminSubscription,
+  type SubscriptionStatusFilter,
   type SubscriptionsOverview,
 } from '@/types/subscription';
 
-type StatusTab = 'all' | 'active' | 'cancelling' | 'expired';
+type StatusTab = SubscriptionStatusFilter;
 
 const DURATION_BADGES = {
   monthly: 'rose',
@@ -31,43 +33,31 @@ const DURATION_BADGES = {
   annual: 'green',
 } as const;
 
-function matchesTab(subscription: AdminSubscription, tab: StatusTab) {
-  switch (tab) {
-    case 'active':
-      return subscription.status === 'active';
-    case 'cancelling':
-      return subscription.status === 'active' && subscription.willRenew === false;
-    case 'expired':
-      return subscription.status === 'expired';
-    default:
-      return true;
-  }
-}
-
 /** Real subscribers, as RevenueCat reported them to the API. */
 export default function SubscriptionsPage() {
-  const overviewFn = useCallback(() => getSubscriptionsOverview(), []);
+  const [activeTab, setActiveTab] = useState<StatusTab>('active');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+
+  // Changing tab or searching starts again from the first page.
+  const changeFilter =
+    <T,>(set: (value: T) => void) =>
+    (value: T) => {
+      set(value);
+      setPage(1);
+    };
+
+  // SearchInput already waits for typing to pause before calling onSearch.
+  const overviewFn = useCallback(
+    () => getSubscriptionsOverview(page, { status: activeTab, search }),
+    [page, activeTab, search],
+  );
   const { data, loading, error, refetch } =
     useService<SubscriptionsOverview>(overviewFn);
 
-  const [activeTab, setActiveTab] = useState<StatusTab>('active');
-  const [search, setSearch] = useState('');
+  const subscriptions = data?.items ?? [];
 
-  const subscriptions = useMemo(() => data?.subscriptions ?? [], [data]);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return subscriptions
-      .filter((s) => matchesTab(s, activeTab))
-      .filter(
-        (s) =>
-          !q ||
-          s.name.toLowerCase().includes(q) ||
-          (s.email ?? '').toLowerCase().includes(q),
-      );
-  }, [subscriptions, activeTab, search]);
-
-  if (loading) {
+  if (loading && !data) {
     return (
       <div className="flex h-96 items-center justify-center">
         <Spinner size="lg" />
@@ -75,7 +65,7 @@ export default function SubscriptionsPage() {
     );
   }
 
-  if (error || !data) {
+  if (!data) {
     return (
       <Card>
         <div className="flex flex-col items-center gap-4 py-10 text-center">
@@ -95,7 +85,7 @@ export default function SubscriptionsPage() {
     { key: 'active', label: 'Actifs', count: stats.active },
     { key: 'cancelling', label: 'Renouvellement coupé', count: stats.cancelling },
     { key: 'expired', label: 'Expirés', count: stats.expired },
-    { key: 'all', label: 'Tous', count: subscriptions.length },
+    { key: 'all', label: 'Tous', count: stats.total },
   ];
 
   return (
@@ -162,16 +152,25 @@ export default function SubscriptionsPage() {
       <Tabs
         tabs={tabs}
         activeKey={activeTab}
-        onChange={(key) => setActiveTab(key as StatusTab)}
+        onChange={(key) => changeFilter(setActiveTab)(key as StatusTab)}
       />
 
       <SearchInput
         value={search}
-        onSearch={setSearch}
+        onSearch={changeFilter(setSearch)}
         placeholder="Rechercher par nom ou e-mail…"
       />
 
-      {filtered.length > 0 ? (
+      {error ? (
+        <Card>
+          <div className="flex flex-col items-center gap-4 py-10 text-center">
+            <p className="text-sm text-muted">{error.message}</p>
+            <Button variant="secondary" onClick={refetch}>
+              Réessayer
+            </Button>
+          </div>
+        </Card>
+      ) : subscriptions.length > 0 ? (
         <Table>
           <Table.Header>
             <th className="px-4 py-3 text-left">Utilisatrice</th>
@@ -183,7 +182,7 @@ export default function SubscriptionsPage() {
             <th className="px-4 py-3 text-left">Renouvellement</th>
           </Table.Header>
           <Table.Body>
-            {filtered.map((s) => (
+            {subscriptions.map((s) => (
               <SubscriberRow key={s.userId} subscription={s} />
             ))}
           </Table.Body>
@@ -200,6 +199,15 @@ export default function SubscriptionsPage() {
             }
           />
         </Card>
+      )}
+
+      {!error && (
+        <Pagination
+          page={data.page}
+          pageSize={data.pageSize}
+          total={data.total}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

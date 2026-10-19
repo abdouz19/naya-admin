@@ -1,3 +1,5 @@
+import type { Paginated } from '@/types/pagination';
+
 export type SubscriptionDuration = 'monthly' | 'quarterly' | 'annual';
 
 export interface AdminSubscription {
@@ -17,8 +19,11 @@ export interface AdminSubscription {
   expiresAt: string | null;
 }
 
-export interface SubscriptionsOverview {
+/** Figures plus one page of subscribers. */
+export interface SubscriptionsOverview extends Paginated<AdminSubscription> {
   stats: {
+    /** Every subscription, active or expired. */
+    total: number;
     active: number;
     cancelling: number;
     expired: number;
@@ -26,8 +31,9 @@ export interface SubscriptionsOverview {
     byDuration: { duration: SubscriptionDuration; label: string; count: number }[];
     unknownDuration: number;
   };
-  subscriptions: AdminSubscription[];
 }
+
+export type SubscriptionStatusFilter = 'all' | 'active' | 'cancelling' | 'expired';
 
 export const STORE_LABELS: Record<string, string> = {
   app_store: 'App Store',
