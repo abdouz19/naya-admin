@@ -1,5 +1,6 @@
 import { mockUsers } from '@/data/mock-users';
 import type { UserProfile } from '@/types/user';
+import { apiFetch } from '@/lib/api';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
@@ -8,7 +9,7 @@ let inMemoryUsers = [...mockUsers];
 
 export async function getUsers(): Promise<UserProfile[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/users/admin/all`);
+    const res = await apiFetch(`${API_BASE_URL}/users/admin/all`);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
@@ -24,7 +25,7 @@ export async function getUsers(): Promise<UserProfile[]> {
 
 export async function getUserById(id: string): Promise<UserProfile | undefined> {
   try {
-    const res = await fetch(`${API_BASE_URL}/users/admin/${id}`);
+    const res = await apiFetch(`${API_BASE_URL}/users/admin/${id}`);
     if (res.ok) {
       const data = await res.json();
       if (data && data.id) return data;
@@ -44,7 +45,7 @@ export interface UserStats {
 
 export async function getUserStats(): Promise<UserStats> {
   try {
-    const res = await fetch(`${API_BASE_URL}/users/admin/stats`);
+    const res = await apiFetch(`${API_BASE_URL}/users/admin/stats`);
     if (res.ok) {
       const data = await res.json();
       if (data && typeof data.total === 'number') return data;
@@ -71,7 +72,7 @@ export async function getUserStats(): Promise<UserStats> {
 
 export async function blockUser(id: string): Promise<UserProfile | undefined> {
   try {
-    const res = await fetch(`${API_BASE_URL}/users/admin/${id}/block`, {
+    const res = await apiFetch(`${API_BASE_URL}/users/admin/${id}/block`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_blocked: true }),
@@ -92,7 +93,7 @@ export async function blockUser(id: string): Promise<UserProfile | undefined> {
 
 export async function unblockUser(id: string): Promise<UserProfile | undefined> {
   try {
-    const res = await fetch(`${API_BASE_URL}/users/admin/${id}/block`, {
+    const res = await apiFetch(`${API_BASE_URL}/users/admin/${id}/block`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_blocked: false }),

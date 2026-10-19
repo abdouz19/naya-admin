@@ -1,5 +1,6 @@
 import { mockAdminUsers, mockRolePermissions } from '@/data/mock-admins';
 import type { AdminRole, AdminUser, RolePermissions } from '@/types/admin';
+import { apiFetch } from '@/lib/api';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
@@ -12,7 +13,7 @@ let permissions = mockRolePermissions.map((rp) => ({
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin-settings/users`);
+    const res = await apiFetch(`${API_BASE_URL}/admin-settings/users`);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
@@ -28,7 +29,7 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
 
 export async function getRolePermissions(): Promise<RolePermissions[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin-settings/permissions`);
+    const res = await apiFetch(`${API_BASE_URL}/admin-settings/permissions`);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
@@ -46,7 +47,7 @@ export async function addAdminUser(
   data: Omit<AdminUser, 'id' | 'created_at' | 'last_login_at'>,
 ): Promise<AdminUser> {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin-settings/users`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin-settings/users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -75,7 +76,7 @@ export async function updateAdminUser(
   updates: Partial<Omit<AdminUser, 'id'>>,
 ): Promise<AdminUser | undefined> {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin-settings/users/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin-settings/users/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
@@ -98,7 +99,7 @@ export async function updateAdminUser(
 
 export async function deleteAdminUser(id: string): Promise<void> {
   try {
-    await fetch(`${API_BASE_URL}/admin-settings/users/${id}`, {
+    await apiFetch(`${API_BASE_URL}/admin-settings/users/${id}`, {
       method: 'DELETE',
     });
   } catch (_) {
@@ -112,7 +113,7 @@ export async function updateRolePermissions(
   updated: RolePermissions['permissions'],
 ): Promise<void> {
   try {
-    await fetch(`${API_BASE_URL}/admin-settings/permissions/${role}`, {
+    await apiFetch(`${API_BASE_URL}/admin-settings/permissions/${role}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ permissions: updated }),

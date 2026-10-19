@@ -1,6 +1,7 @@
 import { getUsers, getUserStats } from '@/services/users.service';
 import { getCandidatures } from '@/services/candidatures.service';
 import { getPosts } from '@/services/community.service';
+import { apiFetch } from '@/lib/api';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
@@ -20,7 +21,7 @@ export interface DashboardKpis {
 
 export async function getKpis(): Promise<DashboardKpis> {
   try {
-    const res = await fetch(`${API_BASE_URL}/dashboard/kpis`);
+    const res = await apiFetch(`${API_BASE_URL}/dashboard/kpis`);
     if (res.ok) {
       const data = await res.json();
       if (data && typeof data.totalUsers === 'number') {
@@ -78,7 +79,7 @@ export interface ActivityItem {
 
 export async function getRecentActivity(): Promise<ActivityItem[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/dashboard/activity`);
+    const res = await apiFetch(`${API_BASE_URL}/dashboard/activity`);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
@@ -159,7 +160,7 @@ export async function getSparklineData(): Promise<{
   costPerDay: SparklinePoint[];
 }> {
   try {
-    const res = await fetch(`${API_BASE_URL}/dashboard/sparklines`);
+    const res = await apiFetch(`${API_BASE_URL}/dashboard/sparklines`);
     if (res.ok) {
       const data = await res.json();
       if (data && Array.isArray(data.usersPerDay)) {

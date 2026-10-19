@@ -1,5 +1,6 @@
 import { mockAteliers, mockWatchRecords } from '@/data/mock-ateliers';
 import type { AtelierVideo, AtelierWatchRecord, AtelierStats } from '@/types/atelier';
+import { apiFetch } from '@/lib/api';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
@@ -8,7 +9,7 @@ let inMemoryAteliers = [...mockAteliers];
 
 export async function getAteliers(): Promise<AtelierVideo[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/ateliers/admin/all`, {
+    const res = await apiFetch(`${API_BASE_URL}/ateliers/admin/all`, {
       cache: 'no-store',
     });
     if (res.ok) {
@@ -30,7 +31,7 @@ export function getWatchRecords(): Promise<AtelierWatchRecord[]> {
 
 export async function addAtelier(atelier: Omit<AtelierVideo, 'id'>): Promise<AtelierVideo> {
   try {
-    const res = await fetch(`${API_BASE_URL}/ateliers/admin`, {
+    const res = await apiFetch(`${API_BASE_URL}/ateliers/admin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(atelier),
@@ -56,7 +57,7 @@ export async function updateAtelier(
   data: Partial<AtelierVideo>,
 ): Promise<AtelierVideo | undefined> {
   try {
-    const res = await fetch(`${API_BASE_URL}/ateliers/admin/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/ateliers/admin/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -77,7 +78,7 @@ export async function updateAtelier(
 
 export async function deleteAtelier(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${API_BASE_URL}/ateliers/admin/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/ateliers/admin/${id}`, {
       method: 'DELETE',
     });
     if (res.ok) {
@@ -94,7 +95,7 @@ export async function deleteAtelier(id: string): Promise<boolean> {
 
 export async function getAtelierStats(): Promise<AtelierStats[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/ateliers/admin/stats`, {
+    const res = await apiFetch(`${API_BASE_URL}/ateliers/admin/stats`, {
       cache: 'no-store',
     });
     if (res.ok) {

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { AdminUser } from '@/types/admin';
+import { ADMIN_TOKEN_STORAGE_KEY, UNAUTHORIZED_EVENT } from '@/lib/api';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
@@ -17,7 +18,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY_USER = 'nayha_admin_user';
-const STORAGE_KEY_TOKEN = 'nayha_admin_token';
+const STORAGE_KEY_TOKEN = ADMIN_TOKEN_STORAGE_KEY;
 const STORAGE_KEY_PERMISSIONS = 'nayha_admin_permissions';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -138,6 +139,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(STORAGE_KEY_TOKEN);
     localStorage.removeItem(STORAGE_KEY_PERMISSIONS);
   };
+
+  // An admin call refused by the API (expired or revoked session): back to
+  // the login page.
+  useEffect(() => {
+    const onUnauthorized = () => logout();
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+  }, []);
 
   return (
     <AuthContext.Provider

@@ -1,4 +1,5 @@
 import type { AppLink, AppLinksCategories, AppLinksFilter } from '@/types/app-link';
+import { apiFetch } from '@/lib/api';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
@@ -285,7 +286,7 @@ export async function getAppLinks(filter?: AppLinksFilter): Promise<AppLink[]> {
 
     const query = params.toString();
     const url = `${API_BASE_URL}/admin-settings/links${query ? `?${query}` : ''}`;
-    const res = await fetch(url);
+    const res = await apiFetch(url);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data)) {
@@ -323,7 +324,7 @@ export async function getAppLinks(filter?: AppLinksFilter): Promise<AppLink[]> {
 
 export async function getAppLinksCategories(): Promise<AppLinksCategories> {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin-settings/links/categories`);
+    const res = await apiFetch(`${API_BASE_URL}/admin-settings/links/categories`);
     if (res.ok) {
       return await res.json();
     }
@@ -346,7 +347,7 @@ export async function updateAppLink(
   updates: { url?: string; title?: string; description?: string },
 ): Promise<AppLink> {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin-settings/links/${key}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin-settings/links/${key}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
@@ -375,7 +376,7 @@ export async function updateAppLink(
 
 export async function resetAppLink(key: string): Promise<AppLink> {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin-settings/links/${key}/reset`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin-settings/links/${key}/reset`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });

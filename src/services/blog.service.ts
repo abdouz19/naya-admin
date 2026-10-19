@@ -1,5 +1,6 @@
 import { mockBlogArticles } from '@/data/mock-blog';
 import type { BlogArticle, BlogStats } from '@/types/blog';
+import { apiFetch } from '@/lib/api';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
@@ -8,7 +9,7 @@ let inMemoryArticles = [...mockBlogArticles];
 
 export async function getAdminBlogArticles(): Promise<BlogArticle[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/blog/admin/articles`, {
+    const res = await apiFetch(`${API_BASE_URL}/blog/admin/articles`, {
       cache: 'no-store',
     });
     if (res.ok) {
@@ -56,7 +57,7 @@ export async function createBlogArticle(
   dto: Omit<BlogArticle, 'id' | 'viewsCount' | 'createdAt' | 'updatedAt'>,
 ): Promise<BlogArticle> {
   try {
-    const res = await fetch(`${API_BASE_URL}/blog/admin/articles`, {
+    const res = await apiFetch(`${API_BASE_URL}/blog/admin/articles`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dto),
@@ -89,7 +90,7 @@ export async function updateBlogArticle(
   dto: Partial<BlogArticle>,
 ): Promise<BlogArticle> {
   try {
-    const res = await fetch(`${API_BASE_URL}/blog/admin/articles/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/blog/admin/articles/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dto),
@@ -124,7 +125,7 @@ export async function updateBlogArticle(
 
 export async function deleteBlogArticle(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${API_BASE_URL}/blog/admin/articles/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/blog/admin/articles/${id}`, {
       method: 'DELETE',
     });
     if (res.ok) {
