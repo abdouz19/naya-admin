@@ -1,4 +1,5 @@
-import type { Candidature } from '@/types/candidature';
+import type { Candidature, CandidatureStatut } from '@/types/candidature';
+import { PAGE_SIZE, type Paginated } from '@/types/pagination';
 import { apiFetch } from '@/lib/api';
 
 const API_BASE_URL =
@@ -6,21 +7,48 @@ const API_BASE_URL =
 
 let inMemoryCandidatures: Candidature[] = [];
 
-export async function getCandidatures(): Promise<Candidature[]> {
-  try {
-    const res = await apiFetch(`${API_BASE_URL}/candidatures/admin/all`);
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        inMemoryCandidatures = data;
-        return data;
-      }
-    }
-  } catch (_) {
-    // fallback
-  }
+export interface CandidatureListFilters {
+  search?: string;
+  statut?: 'all' | CandidatureStatut;
+}
 
-  return inMemoryCandidatures;
+/** One page of candidatures, searched and filtered by the API. */
+export async function getCandidaturesPage(
+  page: number,
+  filters: CandidatureListFilters = {},
+  pageSize = PAGE_SIZE,
+): Promise<Paginated<Candidature>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+  if (filters.search?.trim()) params.set('search', filters.search.trim());
+  if (filters.statut && filters.statut !== 'all') {
+    params.set('statut', filters.statut);
+  }
+  const res = await apiFetch(`${API_BASE_URL}/candidatures/admin/all?${params}`);
+  if (!res.ok) throw new Error('Les candidatures n’ont pas pu être chargées.');
+  return res.json();
+}
+
+/** Every candidature matching the filters (CSV export, dashboard figures). */
+export async function getCandidatures(
+  filters: CandidatureListFilters = {},
+): Promise<Candidature[]> {
+  try {
+    const all: Candidature[] = [];
+    for (let page = 1; page <= 100; page++) {
+      const result = await getCandidaturesPage(page, filters, 100);
+      all.push(...result.items);
+      if (all.length >= result.total || result.items.length === 0) break;
+    }
+    if (!filters.search && (!filters.statut || filters.statut === 'all')) {
+      inMemoryCandidatures = all;
+    }
+    return all;
+  } catch {
+    return inMemoryCandidatures;
+  }
 }
 
 export async function getCandidaturesByUser(userId: string): Promise<Candidature[]> {
@@ -34,6 +62,8 @@ export interface CandidatureStats {
   enCours: number;
   entretiensObtenus: number;
   acceptees: number;
+  /** Number of candidatures in each status (status chart). */
+  byStatut?: Partial<Record<CandidatureStatut, number>>;
 }
 
 export async function getCandidatureStats(): Promise<CandidatureStats> {
@@ -45,7 +75,7 @@ export async function getCandidatureStats(): Promise<CandidatureStats> {
         return data;
       }
     }
-  } catch (_) {
+  } catch {
     // fallback
   }
 
@@ -62,7 +92,9 @@ export async function getCandidatureStats(): Promise<CandidatureStats> {
     (c) => c.statut === 'entretien' || c.statut === 'acceptee',
   ).length;
   const acceptees = candidatures.filter((c) => c.statut === 'acceptee').length;
+  const byStatut: Partial<Record<CandidatureStatut, number>> = {};
+  for (const c of candidatures) byStatut[c.statut] = (byStatut[c.statut] ?? 0) + 1;
 
-  return { total, tauxReponse, enCours, entretiensObtenus, acceptees };
+  return { total, tauxReponse, enCours, entretiensObtenus, acceptees, byStatut };
 }
 

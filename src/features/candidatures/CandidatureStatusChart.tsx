@@ -1,11 +1,12 @@
 import { Card } from '@/components/ui';
 import { StatusDonutChart } from '@/components/charts';
 import { CHART_COLORS } from '@/lib/format';
-import type { Candidature, CandidatureStatut } from '@/types/candidature';
+import type { CandidatureStatut } from '@/types/candidature';
 import { STATUT_LABELS } from '@/types/candidature';
 
 interface CandidatureStatusChartProps {
-  candidatures: Candidature[];
+  /** Number of candidatures in each status, across the whole list. */
+  counts: Partial<Record<CandidatureStatut, number>>;
 }
 
 const STATUT_HEX: Record<CandidatureStatut, string> = {
@@ -18,22 +19,16 @@ const STATUT_HEX: Record<CandidatureStatut, string> = {
 };
 
 export function CandidatureStatusChart({
-  candidatures,
+  counts: rawCounts,
 }: CandidatureStatusChartProps) {
-  const counts = candidatures.reduce<Record<CandidatureStatut, number>>(
-    (acc, c) => {
-      acc[c.statut] = (acc[c.statut] || 0) + 1;
-      return acc;
-    },
-    {
-      envoyee: 0,
-      en_attente: 0,
-      a_relancer: 0,
-      entretien: 0,
-      refusee: 0,
-      acceptee: 0,
-    },
-  );
+  const counts: Record<CandidatureStatut, number> = {
+    envoyee: rawCounts.envoyee ?? 0,
+    en_attente: rawCounts.en_attente ?? 0,
+    a_relancer: rawCounts.a_relancer ?? 0,
+    entretien: rawCounts.entretien ?? 0,
+    refusee: rawCounts.refusee ?? 0,
+    acceptee: rawCounts.acceptee ?? 0,
+  };
 
   const data = (Object.keys(counts) as CandidatureStatut[])
     .filter((key) => counts[key] > 0)

@@ -1,13 +1,24 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Briefcase, Download } from '@/components/icons';
-import { Table, Spinner, SearchInput, Select, Card, EmptyState, Button } from '@/components/ui';
+import {
+  Table,
+  Spinner,
+  SearchInput,
+  Select,
+  Card,
+  EmptyState,
+  Button,
+  Pagination,
+} from '@/components/ui';
 import { useService } from '@/hooks/use-service';
 import {
   getCandidatures,
+  getCandidaturesPage,
   getCandidatureStats,
   type CandidatureStats,
 } from '@/services/candidatures.service';
 import type { Candidature, CandidatureStatut } from '@/types/candidature';
+import type { Paginated } from '@/types/pagination';
 import { STATUT_LABELS } from '@/types/candidature';
 import { CandidatureStatsHeader } from './CandidatureStatsHeader';
 import { CandidatureStatusChart } from './CandidatureStatusChart';
@@ -46,11 +57,7 @@ const statutOptions = [
 ];
 
 export default function CandidaturesPage() {
-  const candidaturesFn = useCallback(() => getCandidatures(), []);
   const statsFn = useCallback(() => getCandidatureStats(), []);
-
-  const { data: candidatures, loading: loadingCandidatures } =
-    useService<Candidature[]>(candidaturesFn);
   const { data: stats, loading: loadingStats } =
     useService<CandidatureStats>(statsFn);
 
@@ -58,31 +65,38 @@ export default function CandidaturesPage() {
   const [statutFilter, setStatutFilter] = useState<'all' | CandidatureStatut>(
     'all',
   );
+  const [page, setPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
 
-  const filtered = useMemo(() => {
-    if (!candidatures) return [];
+  // Searching or filtering starts again from the first page.
+  const changeFilter =
+    <T,>(set: (value: T) => void) =>
+    (value: T) => {
+      set(value);
+      setPage(1);
+    };
 
-    return candidatures.filter((c) => {
-      // Search filter
-      if (search) {
-        const q = search.toLowerCase();
-        const match =
-          c.entreprise.toLowerCase().includes(q) ||
-          c.poste.toLowerCase().includes(q) ||
-          c.user_name.toLowerCase().includes(q);
-        if (!match) return false;
-      }
+  // SearchInput already waits for typing to pause before calling onSearch.
+  const candidaturesFn = useCallback(
+    () => getCandidaturesPage(page, { search, statut: statutFilter }),
+    [page, search, statutFilter],
+  );
+  const { data: candidaturesPage, loading: loadingCandidatures } =
+    useService<Paginated<Candidature>>(candidaturesFn);
+  const candidatures = candidaturesPage?.items ?? [];
 
-      // Statut filter
-      if (statutFilter !== 'all' && c.statut !== statutFilter) return false;
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      exportCandidaturesCsv(
+        await getCandidatures({ search, statut: statutFilter }),
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
 
-      return true;
-    });
-  }, [candidatures, search, statutFilter]);
-
-  const loading = loadingCandidatures || loadingStats;
-
-  if (loading) {
+  if (loadingStats && !stats) {
     return (
       <div className="flex h-96 items-center justify-center">
         <Spinner size="lg" />
@@ -96,15 +110,15 @@ export default function CandidaturesPage() {
       {stats && <CandidatureStatsHeader stats={stats} />}
 
       {/* Chart */}
-      {candidatures && candidatures.length > 0 && (
-        <CandidatureStatusChart candidatures={candidatures} />
+      {stats?.byStatut && stats.total > 0 && (
+        <CandidatureStatusChart counts={stats.byStatut} />
       )}
 
       {/* Filters */}
       <div className="flex items-end gap-4">
         <SearchInput
           value={search}
-          onSearch={setSearch}
+          onSearch={changeFilter(setSearch)}
           placeholder="Rechercher une candidature..."
           className="flex-1"
         />
@@ -114,7 +128,9 @@ export default function CandidaturesPage() {
           options={statutOptions}
           value={statutFilter}
           onChange={(e) =>
-            setStatutFilter(e.target.value as 'all' | CandidatureStatut)
+            changeFilter(setStatutFilter)(
+              e.target.value as 'all' | CandidatureStatut,
+            )
           }
         />
 
@@ -122,14 +138,19 @@ export default function CandidaturesPage() {
           variant="secondary"
           size="sm"
           icon={<Download size={14} />}
-          onClick={() => exportCandidaturesCsv(filtered)}
+          onClick={exportCsv}
+          disabled={exporting}
         >
-          Exporter CSV
+          {exporting ? 'Export…' : 'Exporter CSV'}
         </Button>
       </div>
 
       {/* Table */}
-      {filtered.length > 0 ? (
+      {loadingCandidatures && !candidaturesPage ? (
+        <div className="flex h-48 items-center justify-center">
+          <Spinner size="lg" />
+        </div>
+      ) : candidatures.length > 0 ? (
         <Table>
           <Table.Header>
             <th className="px-4 py-3 text-left">Entreprise</th>
@@ -141,7 +162,7 @@ export default function CandidaturesPage() {
             <th className="px-4 py-3 text-left">Relance</th>
           </Table.Header>
           <Table.Body>
-            {filtered.map((candidature) => (
+            {candidatures.map((candidature) => (
               <CandidatureRow
                 key={candidature.id}
                 candidature={candidature}
@@ -157,6 +178,15 @@ export default function CandidaturesPage() {
             description="Essayez de modifier vos filtres de recherche."
           />
         </Card>
+      )}
+
+      {candidaturesPage && (
+        <Pagination
+          page={candidaturesPage.page}
+          pageSize={candidaturesPage.pageSize}
+          total={candidaturesPage.total}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );
