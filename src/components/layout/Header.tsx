@@ -1,17 +1,6 @@
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { Avatar, Badge } from '@/components/ui';
-
-interface HeaderProps {
-  title: string;
-  subtitle?: string;
-}
-
-const ROLE_BADGE: Record<string, 'rose' | 'gold' | 'green' | 'muted'> = {
-  super_admin: 'rose',
-  admin: 'gold',
-  moderator: 'green',
-  viewer: 'muted',
-};
+import { Avatar } from '@/components/ui';
 
 const ROLE_LABEL: Record<string, string> = {
   super_admin: 'Super Admin',
@@ -20,29 +9,29 @@ const ROLE_LABEL: Record<string, string> = {
   viewer: 'Lecteur',
 };
 
-export function Header({ title, subtitle }: HeaderProps) {
+/** Full-width top bar: brand on the left, signed-in admin on the right. */
+export function Header() {
   const { user } = useAuth();
 
   return (
-    <header className="sticky top-4 z-40 mx-4 mt-4 flex items-center justify-between rounded-3xl bg-cream/95 px-7 py-4 backdrop-blur-sm">
-      <div>
-        <h1 className="font-heading text-3xl text-brown font-semibold">{title}</h1>
-        {subtitle && (
-          <p className="text-sm text-muted mt-0.5">{subtitle}</p>
-        )}
-      </div>
+    <header className="flex items-center justify-between rounded-[18px] border border-line bg-white px-6 py-3 shadow-card">
+      <Link to="/" className="flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-brown shadow-sm">
+          <span className="font-heading text-lg font-bold leading-none text-rose-light">N</span>
+        </div>
+        <span className="font-body text-[17px] font-bold tracking-tight text-ink">
+          NAYHA <span className="text-rose">Admin</span>
+        </span>
+      </Link>
 
       {user && (
-        <div className="flex items-center gap-3">
-          <Badge variant={ROLE_BADGE[user.role] || 'muted'}>
-            {ROLE_LABEL[user.role] || user.role}
-          </Badge>
-          <div className="flex items-center gap-2.5 pl-3 border-l border-gray-200">
-            <Avatar name={user.name} size="sm" />
-            <div className="hidden sm:block text-left">
-              <p className="text-xs font-semibold text-brown">{user.name}</p>
-              <p className="text-[11px] text-muted">{user.email}</p>
-            </div>
+        <div className="flex items-center gap-2.5 rounded-full border border-line bg-canvas/60 py-1 pl-1 pr-4">
+          <Avatar name={user.name} size="sm" />
+          <div className="hidden text-left leading-tight sm:block">
+            <p className="text-[13px] font-semibold text-ink">{user.name}</p>
+            <p className="text-[11px] font-semibold text-rose">
+              {ROLE_LABEL[user.role] ?? user.role}
+            </p>
           </div>
         </div>
       )}

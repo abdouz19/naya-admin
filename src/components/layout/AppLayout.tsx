@@ -1,10 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSidebar } from '@/hooks/use-sidebar';
 import { Sidebar } from './Sidebar';
-import { SIDEBAR_WIDTH } from './sidebar-width';
 import { Header } from './Header';
-import { PageContainer } from './PageContainer';
 
 const routeTitles: Record<string, string> = {
   '/': 'Tableau de bord',
@@ -12,45 +9,43 @@ const routeTitles: Record<string, string> = {
   '/candidatures': 'Candidatures',
   '/ia': 'Intelligence artificielle',
   '/ateliers': 'Ateliers vidéo',
+  '/blog': 'Blog & Conseils',
   '/communaute': 'Communauté',
   '/support': 'Support',
   '/abonnements': 'Abonnements',
   '/reglages': 'Réglages',
 };
 
+/** Top bar, then the sidebar and the page side by side, on a soft canvas. */
 export function AppLayout() {
-  const { collapsed } = useSidebar();
   const location = useLocation();
-
-  const title = routeTitles[location.pathname] ?? 'Nayha';
+  const title = routeTitles[location.pathname] ?? 'NAYHA';
 
   return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar />
+    <div className="flex min-h-screen flex-col gap-4 bg-canvas px-5 py-4">
+      <Header />
 
-      <main
-        className="flex-1 flex flex-col min-h-screen transition-all duration-300"
-        style={{
-          marginLeft: collapsed ? SIDEBAR_WIDTH.collapsed : SIDEBAR_WIDTH.open,
-        }}
-      >
-        <Header title={title} />
+      <div className="flex flex-1 gap-4">
+        <Sidebar />
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="flex-1"
-          >
-            <PageContainer>
+        <main className="min-w-0 flex-1">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="flex flex-col gap-4"
+            >
+              <h1 className="px-1 pt-1 font-body text-[26px] font-bold tracking-tight text-ink">
+                {title}
+              </h1>
               <Outlet />
-            </PageContainer>
-          </motion.div>
-        </AnimatePresence>
-      </main>
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
     </div>
   );
 }

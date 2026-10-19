@@ -21,6 +21,10 @@
   --color-danger: #D67768;
   --color-danger-light: #FDE8E4;
   --color-ink: #1C2B3A;
+  --color-ink-soft: #4B5563;
+  --color-canvas: #F5F3F1;
+  --color-line: #ECE7E3;
+  --color-line-light: #F2EEEB;
 
   --font-heading: 'Cormorant Garamond', serif;
   --font-body: 'Jost', sans-serif;
@@ -29,7 +33,7 @@
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
 
-  --shadow-card: 0 1px 2px rgba(92, 61, 46, 0.04);
+  --shadow-card: 0 1px 3px 0 rgba(16, 24, 40, 0.04), 0 1px 2px -1px rgba(16, 24, 40, 0.02);
   --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.08);
   --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
@@ -45,7 +49,7 @@
 
 body {
   font-family: var(--font-body);
-  background-color: #ffffff;
+  background-color: var(--color-canvas);
   color: var(--color-ink);
   margin: 0;
   -webkit-font-smoothing: antialiased;
