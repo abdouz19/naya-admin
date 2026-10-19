@@ -28,7 +28,7 @@ export function Card({
       {(title || subtitle) && (
         <div className={cn(noPadding && 'px-6 pt-6', 'mb-4')}>
           {title && (
-            <h3 className="font-heading text-lg font-semibold text-brown">
+            <h3 className="text-base font-semibold text-ink">
               {title}
             </h3>
           )}

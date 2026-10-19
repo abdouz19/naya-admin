@@ -25,8 +25,11 @@
   --color-canvas: #F5F3F1;
   --color-line: #ECE7E3;
   --color-line-light: #F2EEEB;
+  /* Used as border-border by some pages: the light warm line colour. */
+  --color-border: #ECE7E3;
 
-  --font-heading: 'Cormorant Garamond', serif;
+  /* One sans family across the admin, headings included. */
+  --font-heading: 'Jost', sans-serif;
   --font-body: 'Jost', sans-serif;
 
   --radius-sm: 0.5rem;
@@ -55,7 +58,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4 {
-  font-family: var(--font-heading);
-  color: var(--color-brown);
+@layer base {
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+    color: var(--color-ink);
+  }
 }

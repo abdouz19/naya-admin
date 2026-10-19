@@ -38,7 +38,7 @@ export function AppLayout() {
               transition={{ duration: 0.2, ease: 'easeInOut' }}
               className="flex flex-col gap-4"
             >
-              <h1 className="px-1 pt-1 font-body text-[26px] font-bold tracking-tight text-ink">
+              <h1 className="px-1 pt-1 text-[26px] font-bold tracking-tight text-ink">
                 {title}
               </h1>
               <Outlet />
