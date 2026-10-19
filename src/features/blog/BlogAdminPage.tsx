@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   BookOpen,
   Plus,
@@ -11,16 +11,18 @@ import {
   Trash2,
   Search,
 } from '@/components/icons';
-import { Card, Spinner, Stat, Button, Badge } from '@/components/ui';
+import { Card, Spinner, Stat, Button, Badge, Pagination } from '@/components/ui';
 import { useService } from '@/hooks/use-service';
 import {
-  getAdminBlogArticles,
+  getAdminBlogArticlesPage,
   getBlogStats,
   createBlogArticle,
   updateBlogArticle,
   deleteBlogArticle,
 } from '@/services/blog.service';
 import type { BlogArticle, BlogStats } from '@/types/blog';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import type { Paginated } from '@/types/pagination';
 import { formatNumber } from '@/lib/format';
 import { BlogArticleModal } from './BlogArticleModal';
 
@@ -33,7 +35,6 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default function BlogAdminPage() {
   const statsFn = useCallback(() => getBlogStats(), []);
-  const articlesFn = useCallback(() => getAdminBlogArticles(), []);
 
   const {
     data: stats,
@@ -41,14 +42,34 @@ export default function BlogAdminPage() {
     refetch: refetchStats,
   } = useService<BlogStats>(statsFn);
 
-  const {
-    data: articles,
-    loading: loadingArticles,
-    refetch: refetchArticles,
-  } = useService<BlogArticle[]>(articlesFn);
-
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tous');
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(searchQuery);
+
+  // Searching or filtering starts again from the first page.
+  const changeFilter =
+    <T,>(set: (value: T) => void) =>
+    (value: T) => {
+      set(value);
+      setPage(1);
+    };
+
+  const articlesFn = useCallback(
+    () =>
+      getAdminBlogArticlesPage(page, {
+        search: debouncedSearch,
+        category: selectedCategory,
+      }),
+    [page, debouncedSearch, selectedCategory],
+  );
+  const {
+    data: articlesPage,
+    loading: loadingArticles,
+    refetch: refetchArticles,
+  } = useService<Paginated<BlogArticle>>(articlesFn);
+  const filteredArticles = articlesPage?.items ?? [];
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<BlogArticle | null>(null);
   const [saving, setSaving] = useState(false);
@@ -97,7 +118,9 @@ export default function BlogAdminPage() {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'article "${title}" ?`)) {
       try {
         await deleteBlogArticle(id);
-        refetchArticles();
+        // Last article of a page: show the previous page.
+        if (filteredArticles.length === 1 && page > 1) setPage(page - 1);
+        else refetchArticles();
         refetchStats();
       } catch (e) {
         console.error(e);
@@ -105,22 +128,7 @@ export default function BlogAdminPage() {
     }
   };
 
-  const filteredArticles = useMemo(() => {
-    if (!articles) return [];
-    return articles.filter((a) => {
-      const matchCat =
-        selectedCategory === 'Tous' ||
-        a.category.toLowerCase() === selectedCategory.toLowerCase();
-      const matchSearch =
-        !searchQuery.trim() ||
-        a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.keyTakeaway.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchCat && matchSearch;
-    });
-  }, [articles, selectedCategory, searchQuery]);
-
-  const loading = loadingStats || loadingArticles;
+  const loading = (loadingStats && !stats) || (loadingArticles && !articlesPage);
 
   if (loading) {
     return (
@@ -172,7 +180,7 @@ export default function BlogAdminPage() {
             (cat) => (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
+                onClick={() => changeFilter(setSelectedCategory)(cat)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
                   selectedCategory === cat
                     ? 'bg-brown text-cream shadow-sm'
@@ -196,7 +204,7 @@ export default function BlogAdminPage() {
               type="text"
               placeholder="Rechercher un article..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => changeFilter(setSearchQuery)(e.target.value)}
               className="pl-9 pr-4 py-2 text-xs rounded-lg border border-gray-200 bg-white text-brown outline-none transition focus:border-rose placeholder:text-muted w-60"
             />
           </div>
@@ -320,6 +328,15 @@ export default function BlogAdminPage() {
           </table>
         </div>
       </Card>
+
+      {articlesPage && (
+        <Pagination
+          page={articlesPage.page}
+          pageSize={articlesPage.pageSize}
+          total={articlesPage.total}
+          onPageChange={setPage}
+        />
+      )}
 
       {/* Modal */}
       <BlogArticleModal

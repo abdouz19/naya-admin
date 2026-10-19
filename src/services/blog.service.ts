@@ -1,25 +1,53 @@
 import { mockBlogArticles } from '@/data/mock-blog';
 import type { BlogArticle, BlogStats } from '@/types/blog';
 import { apiFetch } from '@/lib/api';
+import { PAGE_SIZE, type Paginated } from '@/types/pagination';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
 
 let inMemoryArticles = [...mockBlogArticles];
 
-export async function getAdminBlogArticles(): Promise<BlogArticle[]> {
+export interface BlogListFilters {
+  search?: string;
+  category?: string;
+}
+
+/** One page of articles, searched and filtered by the API. */
+export async function getAdminBlogArticlesPage(
+  page: number,
+  filters: BlogListFilters = {},
+  pageSize = PAGE_SIZE,
+): Promise<Paginated<BlogArticle>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+  if (filters.search?.trim()) params.set('search', filters.search.trim());
+  if (filters.category && filters.category !== 'Tous') {
+    params.set('category', filters.category);
+  }
+  const res = await apiFetch(`${API_BASE_URL}/blog/admin/articles?${params}`, {
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error('Les articles n’ont pas pu être chargés.');
+  return res.json();
+}
+
+/** Every article matching the filters (stats). */
+export async function getAdminBlogArticles(
+  filters: BlogListFilters = {},
+): Promise<BlogArticle[]> {
   try {
-    const res = await apiFetch(`${API_BASE_URL}/blog/admin/articles`, {
-      cache: 'no-store',
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && Array.isArray(data.articles)) {
-        inMemoryArticles = data.articles;
-        return data.articles;
-      }
+    const all: BlogArticle[] = [];
+    for (let page = 1; page <= 100; page++) {
+      const result = await getAdminBlogArticlesPage(page, filters, 100);
+      all.push(...result.items);
+      if (all.length >= result.total || result.items.length === 0) break;
     }
-  } catch (_) {
+    inMemoryArticles = all;
+    return all;
+  } catch {
     // fallback to local mock
   }
   return [...inMemoryArticles];
