@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, Mail, Eye, EyeOff, AlertCircle, ShieldCheck, ArrowRight } from '@/components/icons';
+import { Eye, EyeOff, AlertCircle } from '@/components/icons';
 import { useAuth } from '@/context/AuthContext';
-import { Button } from '@/components/ui';
+
+const inputClass =
+  'w-full rounded-xl border border-line bg-white px-4 py-3 text-[15px] text-ink placeholder:text-muted-light outline-none transition-colors focus:border-rose focus:ring-2 focus:ring-rose/15';
 
 export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
@@ -16,7 +18,9 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const from = (location.state as any)?.from?.pathname || '/';
+  const from =
+    (location.state as { from?: { pathname?: string } } | null)?.from
+      ?.pathname || '/';
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -27,131 +31,146 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
-      setError('Veuillez saisir votre adresse e-mail et votre mot de passe.');
+      setError('Saisis ton adresse e-mail et ton mot de passe.');
       return;
     }
 
     setError(null);
     setLoading(true);
-
     const res = await login(email.trim(), password);
     setLoading(false);
 
     if (res.success) {
       navigate(from, { replace: true });
     } else {
-      setError(res.error || 'Identifiants invalides');
+      setError(res.error || 'E-mail ou mot de passe incorrect.');
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-cream px-4 py-12 relative overflow-hidden">
-      {/* Decorative background blurs */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-rose/10 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-gold/10 blur-3xl pointer-events-none" />
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="w-full max-w-md"
-      >
-        {/* Main Card */}
-        <div className="radius-lg border border-gray-200 bg-white p-8 shadow-card">
-          {/* Header */}
-          <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-14 h-14 rounded-full bg-rose flex items-center justify-center shadow-md mb-4">
-              <span className="text-white font-heading text-2xl font-bold leading-none">N</span>
-            </div>
-            <h1 className="font-heading text-2xl font-semibold text-brown">
-              NAYHA Administration
-            </h1>
-            <p className="text-sm text-muted mt-1">
-              Connectez-vous pour gérer la plateforme et les utilisatrices
+    <div className="flex min-h-screen bg-canvas p-4">
+      <div className="flex w-full overflow-hidden rounded-[28px] bg-white p-3 shadow-card">
+        {/* Visual */}
+        <div className="relative hidden w-1/2 overflow-hidden rounded-[22px] lg:block">
+          <img
+            src="/login-visual.jpg"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-brown/90 via-brown/35 to-transparent" />
+          <div className="relative p-12">
+            <h2 className="max-w-md text-[44px] font-semibold leading-[1.1] tracking-tight text-white">
+              Chaque parcours mérite d’être accompagné.
+            </h2>
+            <p className="mt-4 max-w-sm text-base text-white/80">
+              L’espace de l’équipe NAYHA pour suivre et soutenir les
+              utilisatrices.
             </p>
           </div>
+        </div>
 
-          {/* Error alert */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-            >
-              <AlertCircle size={18} className="shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </motion.div>
-          )}
+        {/* Form */}
+        <div className="flex flex-1 items-center justify-center px-6 py-10">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="w-full max-w-[440px]"
+          >
+            <img
+              src="/nayha-logo.png"
+              alt="NAYHA"
+              className="h-16 w-16 rounded-2xl shadow-sm"
+            />
+            <h1 className="mt-8 text-[32px] font-semibold tracking-tight text-ink">
+              Connexion à l’administration
+            </h1>
+            <p className="mt-2 text-base text-muted">
+              Connecte-toi avec ton compte de l’équipe NAYHA.
+            </p>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-brown">
-                Adresse e-mail
-              </label>
-              <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted">
-                  <Mail size={16} />
-                </span>
+            <div className="my-8 h-px bg-line-light" />
+
+            {error && (
+              <div className="mb-5 flex items-start gap-2.5 rounded-xl bg-danger-light px-4 py-3 text-sm text-danger">
+                <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+              <div>
+                <label
+                  htmlFor="email"
+                  className="mb-1.5 block text-sm text-ink-soft"
+                >
+                  Adresse e-mail
+                </label>
                 <input
+                  id="email"
                   type="email"
+                  autoComplete="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@nayha.fr"
-                  required
-                  className="w-full radius-sm border border-gray-300 bg-white pl-9 pr-3 py-2.5 text-sm text-ink placeholder:text-muted-light transition-colors focus:border-rose focus:ring-1 focus:ring-rose/30 focus:outline-none"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError(null);
+                  }}
+                  placeholder="prenom@nayha.fr"
+                  className={inputClass}
+                  autoFocus
                 />
               </div>
-            </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-sm font-medium text-brown">
+              <div>
+                <label
+                  htmlFor="password"
+                  className="mb-1.5 block text-sm text-ink-soft"
+                >
                   Mot de passe
                 </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (error) setError(null);
+                    }}
+                    placeholder="••••••••"
+                    className={`${inputClass} pr-12`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer p-1 text-muted transition-colors hover:text-ink"
+                    aria-label={
+                      showPassword
+                        ? 'Masquer le mot de passe'
+                        : 'Afficher le mot de passe'
+                    }
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
-              <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted">
-                  <Lock size={16} />
-                </span>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="w-full radius-sm border border-gray-300 bg-white pl-9 pr-10 py-2.5 text-sm text-ink placeholder:text-muted-light transition-colors focus:border-rose focus:ring-1 focus:ring-rose/30 focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-3 flex items-center text-muted hover:text-brown transition-colors cursor-pointer"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
 
-            <div className="pt-2">
-              <Button
+              <button
                 type="submit"
-                variant="primary"
-                loading={loading}
-                className="w-full justify-center py-2.5"
-                icon={<ArrowRight size={16} />}
+                disabled={loading}
+                className="mt-2 w-full cursor-pointer rounded-xl bg-brown py-3.5 text-[15px] font-medium text-white transition-colors hover:bg-brown-light disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Se connecter
-              </Button>
-            </div>
-          </form>
-        </div>
+                {loading ? 'Connexion…' : 'Se connecter'}
+              </button>
+            </form>
 
-        {/* Footer info */}
-        <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-muted">
-          <ShieldCheck size={14} className="text-green" />
-          <span>Espace sécurisé réservé à l'équipe NAYHA</span>
+            <p className="mt-6 text-center text-sm text-muted">
+              Accès réservé à l’équipe NAYHA.
+            </p>
+          </motion.div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
