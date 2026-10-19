@@ -23,7 +23,7 @@ export function SidebarNavItem({ icon: Icon, label, to, collapsed, badge }: Side
         [
           'group relative flex items-center gap-3 rounded-xl py-2.5 transition-colors duration-200',
           collapsed ? 'justify-center px-0' : 'px-3',
-          isActive ? 'text-brown' : 'text-muted hover:text-brown hover:bg-cream/70',
+          isActive ? 'bg-white text-brown' : 'text-muted hover:text-brown hover:bg-white/60',
         ].join(' ')
       }
     >

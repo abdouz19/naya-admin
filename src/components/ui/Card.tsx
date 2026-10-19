@@ -19,7 +19,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'bg-white radius-md shadow-card',
+        'bg-white rounded-3xl border border-[#F0E6DF]',
         'transition-shadow duration-200 hover:shadow-card-hover',
         !noPadding && 'p-6',
         className,

@@ -82,7 +82,7 @@ export function Sidebar() {
 
   return (
     <motion.aside
-      className="fixed left-4 top-4 bottom-4 z-50 flex flex-col overflow-hidden rounded-3xl bg-white shadow-card"
+      className="fixed left-4 top-4 bottom-4 z-50 flex flex-col overflow-hidden rounded-3xl bg-cream"
       animate={{ width: collapsed ? SIDEBAR_WIDTH.collapsed - 32 : SIDEBAR_WIDTH.open - 32 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
     >
@@ -104,7 +104,7 @@ export function Sidebar() {
         </div>
         <button
           onClick={toggle}
-          className="rounded-lg p-1.5 text-muted transition-colors hover:bg-cream hover:text-brown cursor-pointer"
+          className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white hover:text-brown cursor-pointer"
           aria-label={collapsed ? 'Ouvrir le menu' : 'Réduire le menu'}
           title={collapsed ? 'Ouvrir le menu' : 'Réduire le menu'}
         >
@@ -143,7 +143,7 @@ export function Sidebar() {
       {user && (
         <div className={`p-3 ${collapsed ? '' : 'px-4 pb-4'}`}>
           <div
-            className={`flex items-center gap-3 rounded-2xl bg-cream p-3 ${
+            className={`flex items-center gap-3 rounded-2xl bg-white p-3 ${
               collapsed ? 'flex-col px-0 py-3' : ''
             }`}
           >
@@ -160,7 +160,7 @@ export function Sidebar() {
               onClick={logout}
               title="Se déconnecter"
               aria-label="Se déconnecter"
-              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white hover:text-rose cursor-pointer"
+              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-cream hover:text-rose cursor-pointer"
             >
               <LogOut size={16} />
             </button>

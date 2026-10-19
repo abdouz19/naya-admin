@@ -25,7 +25,7 @@ export function AppLayout() {
   const title = routeTitles[location.pathname] ?? 'Nayha';
 
   return (
-    <div className="flex min-h-screen bg-cream">
+    <div className="flex min-h-screen bg-white">
       <Sidebar />
 
       <main

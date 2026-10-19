@@ -24,7 +24,7 @@ export function Header({ title, subtitle }: HeaderProps) {
   const { user } = useAuth();
 
   return (
-    <header className="sticky top-4 z-40 mx-4 mt-4 flex items-center justify-between rounded-3xl bg-white/90 px-7 py-4 shadow-card backdrop-blur-sm">
+    <header className="sticky top-4 z-40 mx-4 mt-4 flex items-center justify-between rounded-3xl bg-cream/95 px-7 py-4 backdrop-blur-sm">
       <div>
         <h1 className="font-heading text-3xl text-brown font-semibold">{title}</h1>
         {subtitle && (
