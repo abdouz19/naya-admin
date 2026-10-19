@@ -4,6 +4,7 @@ import type {
   SupportTicket,
   SupportTicketDetail,
 } from '@/types/support';
+import { PAGE_SIZE, type Paginated } from '@/types/pagination';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
@@ -69,13 +70,25 @@ export async function getSupportStats(token: string | null): Promise<SupportStat
   return stats;
 }
 
-export async function getSupportTickets(
+export interface SupportTicketFilters {
+  status?: SupportStatus;
+  search?: string;
+}
+
+/** One page of the inbox, filtered by status and searched by the API. */
+export function getSupportTicketsPage(
   token: string | null,
-  status?: SupportStatus,
-): Promise<SupportTicket[]> {
-  const query = status ? `?status=${encodeURIComponent(status)}` : '';
-  const data = await supportRequest<SupportTicket[]>(`/tickets${query}`, token);
-  return Array.isArray(data) ? data : [];
+  page: number,
+  filters: SupportTicketFilters = {},
+  pageSize = PAGE_SIZE,
+): Promise<Paginated<SupportTicket>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+  if (filters.status) params.set('status', filters.status);
+  if (filters.search?.trim()) params.set('search', filters.search.trim());
+  return supportRequest<Paginated<SupportTicket>>(`/tickets?${params}`, token);
 }
 
 export function getSupportTicket(token: string | null, id: string): Promise<SupportTicketDetail> {

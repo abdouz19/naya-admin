@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Inbox, MessagesSquare, RefreshCw, TriangleAlert } from '@/components/icons';
-import { Button, Card, EmptyState, Spinner, Tabs } from '@/components/ui';
+import { Button, Card, EmptyState, Pagination, SearchInput, Spinner, Tabs } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/cn';
 import {
@@ -8,7 +8,7 @@ import {
   SupportAuthError,
   getSupportStats,
   getSupportTicket,
-  getSupportTickets,
+  getSupportTicketsPage,
   replyToSupportTicket,
   resolveSupportTicket,
 } from '@/services/support.service';
@@ -43,6 +43,11 @@ export default function SupportPage() {
   const [tab, setTab] = useState<TabKey>('waiting');
   const [stats, setStats] = useState<SupportStats | null>(null);
   const [tickets, setTickets] = useState<SupportTicket[] | null>(null);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [listPage, setListPage] = useState<{ total: number; pageSize: number } | null>(
+    null,
+  );
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
   const [authError, setAuthError] = useState(false);
@@ -63,12 +68,21 @@ export default function SupportPage() {
     const req = ++listRequest.current;
     return Promise.all([
       getSupportStats(token),
-      getSupportTickets(token, tab === 'all' ? undefined : tab),
+      getSupportTicketsPage(token, page, {
+        status: tab === 'all' ? undefined : tab,
+        search,
+      }),
     ])
-      .then(([nextStats, nextTickets]) => {
+      .then(([nextStats, nextPage]) => {
         if (req !== listRequest.current) return;
+        // The last request of a page left it (resolved, answered): go back one page.
+        if (nextPage.items.length === 0 && page > 1) {
+          setPage(page - 1);
+          return;
+        }
         setStats(nextStats);
-        setTickets(nextTickets);
+        setTickets(nextPage.items);
+        setListPage({ total: nextPage.total, pageSize: nextPage.pageSize });
         setListError(null);
       })
       .catch((err: unknown) => {
@@ -79,7 +93,7 @@ export default function SupportPage() {
       .finally(() => {
         if (req === listRequest.current) setListLoading(false);
       });
-  }, [token, tab]);
+  }, [token, tab, page, search]);
 
   useEffect(() => {
     void refreshList();
@@ -87,12 +101,39 @@ export default function SupportPage() {
     return () => window.clearInterval(interval);
   }, [refreshList]);
 
-  const handleTabChange = useCallback((key: string) => {
-    setTab(key as TabKey);
+  /** Changing tab, search or page shows a fresh list. */
+  const resetList = useCallback(() => {
     setTickets(null);
+    setListPage(null);
     setListError(null);
     setListLoading(true);
   }, []);
+
+  const handleTabChange = useCallback(
+    (key: string) => {
+      setTab(key as TabKey);
+      setPage(1);
+      resetList();
+    },
+    [resetList],
+  );
+
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearch(value.trim());
+      setPage(1);
+      resetList();
+    },
+    [resetList],
+  );
+
+  const handlePageChange = useCallback(
+    (next: number) => {
+      setPage(next);
+      resetList();
+    },
+    [resetList],
+  );
 
   // ── Detail ────────────────────────────────────────────────
   const applyDetail = useCallback((next: SupportTicketDetail) => {
@@ -214,7 +255,9 @@ export default function SupportPage() {
         >
           <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2.5">
             <span className="text-xs font-medium uppercase tracking-wider text-muted">
-              {tickets ? `${tickets.length} demande${tickets.length > 1 ? 's' : ''}` : 'Demandes'}
+              {listPage
+                ? `${listPage.total} demande${listPage.total > 1 ? 's' : ''}`
+                : 'Demandes'}
             </span>
             <button
               type="button"
@@ -225,6 +268,10 @@ export default function SupportPage() {
             >
               <RefreshCw size={14} />
             </button>
+          </div>
+
+          <div className="border-b border-gray-200 px-3 py-2">
+            <SearchInput onSearch={handleSearch} placeholder="Rechercher une demande..." />
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto">
@@ -242,7 +289,10 @@ export default function SupportPage() {
                 </Button>
               </div>
             ) : tickets && tickets.length === 0 ? (
-              <EmptyState icon={Inbox} title={EMPTY_LABELS[tab]} />
+              <EmptyState
+                icon={Inbox}
+                title={search ? 'Aucune demande trouvée' : EMPTY_LABELS[tab]}
+              />
             ) : (
               <>
                 {listError && (
@@ -261,6 +311,16 @@ export default function SupportPage() {
               </>
             )}
           </div>
+
+          {listPage && listPage.total > listPage.pageSize && (
+            <Pagination
+              page={page}
+              pageSize={listPage.pageSize}
+              total={listPage.total}
+              onPageChange={handlePageChange}
+              className="shrink-0 border-t border-gray-200 px-3 py-2 [&_button]:h-8 [&_button]:min-w-8 [&_button]:px-2 [&_p]:text-xs"
+            />
+          )}
         </aside>
 
         {/* Conversation */}
