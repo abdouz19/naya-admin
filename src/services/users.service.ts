@@ -1,26 +1,59 @@
 import { mockUsers } from '@/data/mock-users';
 import type { UserProfile } from '@/types/user';
 import { apiFetch } from '@/lib/api';
+import { PAGE_SIZE, type Paginated } from '@/types/pagination';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
 
 let inMemoryUsers = [...mockUsers];
 
-export async function getUsers(): Promise<UserProfile[]> {
-  try {
-    const res = await apiFetch(`${API_BASE_URL}/users/admin/all`);
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        inMemoryUsers = data;
-        return data;
-      }
-    }
-  } catch (_) {
-    // fallback
+export interface UserListFilters {
+  search?: string;
+  diagnostic?: 'all' | 'completed' | 'incomplete';
+  plan?: 'all' | 'paid' | 'free';
+  parcours?: string;
+}
+
+/** One page of users, searched and filtered by the API. */
+export async function getUsersPage(
+  page: number,
+  filters: UserListFilters = {},
+  pageSize = PAGE_SIZE,
+): Promise<Paginated<UserProfile>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+  if (filters.search?.trim()) params.set('search', filters.search.trim());
+  if (filters.diagnostic && filters.diagnostic !== 'all') {
+    params.set('diagnostic', filters.diagnostic);
   }
-  return [...inMemoryUsers];
+  if (filters.plan && filters.plan !== 'all') params.set('plan', filters.plan);
+  if (filters.parcours && filters.parcours !== 'all') {
+    params.set('parcours', filters.parcours);
+  }
+  const res = await apiFetch(`${API_BASE_URL}/users/admin/all?${params}`);
+  if (!res.ok) throw new Error('Les utilisatrices n’ont pas pu être chargées.');
+  return res.json();
+}
+
+/** Every user matching the filters (CSV export, dashboard figures). */
+export async function getUsers(
+  filters: UserListFilters = {},
+): Promise<UserProfile[]> {
+  try {
+    const all: UserProfile[] = [];
+    for (let page = 1; page <= 100; page++) {
+      const result = await getUsersPage(page, filters, 100);
+      all.push(...result.items);
+      if (all.length >= result.total || result.items.length === 0) break;
+    }
+    inMemoryUsers = all;
+    return all;
+  } catch (_) {
+    return [...inMemoryUsers];
+  }
 }
 
 export async function getUserById(id: string): Promise<UserProfile | undefined> {

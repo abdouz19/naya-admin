@@ -1,8 +1,15 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Users, Activity, CreditCard, ClipboardCheck, Download } from '@/components/icons';
-import { Table, Stat, Spinner, Card, EmptyState, Button } from '@/components/ui';
+import { Table, Stat, Spinner, Card, EmptyState, Button, Pagination } from '@/components/ui';
 import { useService } from '@/hooks/use-service';
-import { getUsers, getUserStats, type UserStats } from '@/services/users.service';
+import {
+  getUsers,
+  getUsersPage,
+  getUserStats,
+  type UserStats,
+} from '@/services/users.service';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import type { Paginated } from '@/types/pagination';
 import { formatNumber } from '@/lib/format';
 import type { UserProfile } from '@/types/user';
 import { UserFilters } from './UserFilters';
@@ -42,10 +49,7 @@ function exportUsersCsv(users: UserProfile[]) {
 }
 
 export default function UsersPage() {
-  const usersFn = useCallback(() => getUsers(), []);
   const statsFn = useCallback(() => getUserStats(), []);
-
-  const { data: users, loading: loadingUsers } = useService<UserProfile[]>(usersFn);
   const { data: stats, loading: loadingStats } = useService<UserStats>(statsFn);
 
   const [search, setSearch] = useState('');
@@ -56,58 +60,50 @@ export default function UsersPage() {
   const [parcoursFilter, setParcoursFilter] = useState<
     'all' | 'retour_emploi' | 'reconversion' | 'creation_activite'
   >('all');
+  const [page, setPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
 
-  const filtered = useMemo(() => {
-    if (!users) return [];
+  const debouncedSearch = useDebouncedValue(search);
+  const filters = {
+    search: debouncedSearch,
+    diagnostic: diagnosticFilter,
+    plan: paidFilter,
+    parcours: parcoursFilter,
+  };
 
-    return users.filter((u) => {
-      // Search filter
-      if (search) {
-        const q = search.toLowerCase();
-        const match =
-          u.name.toLowerCase().includes(q) ||
-          u.email.toLowerCase().includes(q) ||
-          (u.selected_metier_titre ?? '').toLowerCase().includes(q);
-        if (!match) return false;
-      }
+  // Searching or filtering starts again from the first page.
+  const changeFilter =
+    <T,>(set: (value: T) => void) =>
+    (value: T) => {
+      set(value);
+      setPage(1);
+    };
 
-      // Diagnostic filter
-      if (diagnosticFilter === 'completed') {
-        if (!u.diagnostic_vie_completed || !u.diagnostic_pro_completed)
-          return false;
-      } else if (diagnosticFilter === 'incomplete') {
-        if (u.diagnostic_vie_completed && u.diagnostic_pro_completed)
-          return false;
-      }
+  const usersFn = useCallback(
+    () =>
+      getUsersPage(page, {
+        search: debouncedSearch,
+        diagnostic: diagnosticFilter,
+        plan: paidFilter,
+        parcours: parcoursFilter,
+      }),
+    [page, debouncedSearch, diagnosticFilter, paidFilter, parcoursFilter],
+  );
+  const { data: usersPage, loading: loadingUsers } =
+    useService<Paginated<UserProfile>>(usersFn);
+  const users = usersPage?.items ?? [];
 
-      // Paid filter
-      if (paidFilter === 'paid' && !u.has_paid) return false;
-      if (paidFilter === 'free' && u.has_paid) return false;
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      exportUsersCsv(await getUsers(filters));
+    } finally {
+      setExporting(false);
+    }
+  };
 
-      // Parcours filter
-      if (parcoursFilter !== 'all') {
-        const target = parcoursFilter.toLowerCase().replace(/[^a-z]/g, '');
-        const list = (
-          u.parcours_types && u.parcours_types.length > 0
-            ? u.parcours_types
-            : u.parcours_type
-            ? [u.parcours_type]
-            : []
-        ).map((p) => p.toLowerCase().replace(/[^a-z]/g, ''));
-
-        if (!list.some((p) => p.includes(target) || target.includes(p))) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [users, search, diagnosticFilter, paidFilter, parcoursFilter]);
-
-  const loading = loadingUsers || loadingStats;
-
-  if (loading) {
+  if (loadingStats && !stats) {
     return (
       <div className="flex h-96 items-center justify-center">
         <Spinner size="lg" />
@@ -154,27 +150,32 @@ export default function UsersPage() {
         <div className="flex-1">
           <UserFilters
         search={search}
-        onSearchChange={setSearch}
-        diagnosticFilter={diagnosticFilter}
-        onDiagnosticChange={setDiagnosticFilter}
-        paidFilter={paidFilter}
-        onPaidChange={setPaidFilter}
+            onSearchChange={changeFilter(setSearch)}
+            diagnosticFilter={diagnosticFilter}
+            onDiagnosticChange={changeFilter(setDiagnosticFilter)}
+            paidFilter={paidFilter}
+            onPaidChange={changeFilter(setPaidFilter)}
             parcoursFilter={parcoursFilter}
-            onParcoursChange={setParcoursFilter}
+            onParcoursChange={changeFilter(setParcoursFilter)}
           />
         </div>
         <Button
           variant="secondary"
           size="sm"
           icon={<Download size={14} />}
-          onClick={() => exportUsersCsv(filtered)}
+          onClick={exportCsv}
+          disabled={exporting}
         >
-          Exporter CSV
+          {exporting ? 'Export…' : 'Exporter CSV'}
         </Button>
       </div>
 
       {/* Table */}
-      {filtered.length > 0 ? (
+      {loadingUsers && !usersPage ? (
+        <div className="flex h-48 items-center justify-center">
+          <Spinner size="lg" />
+        </div>
+      ) : users.length > 0 ? (
         <Table>
           <Table.Header>
             <th className="px-4 py-3 text-left">Nom</th>
@@ -186,7 +187,7 @@ export default function UsersPage() {
             <th className="px-4 py-3 text-left">Derniere activite</th>
           </Table.Header>
           <Table.Body>
-            {filtered.map((user) => (
+            {users.map((user) => (
               <UserRow
                 key={user.id}
                 user={user}
@@ -203,6 +204,15 @@ export default function UsersPage() {
             description="Essayez de modifier vos filtres de recherche."
           />
         </Card>
+      )}
+
+      {usersPage && (
+        <Pagination
+          page={usersPage.page}
+          pageSize={usersPage.pageSize}
+          total={usersPage.total}
+          onPageChange={setPage}
+        />
       )}
 
       {/* Detail panel */}

@@ -12,3 +12,4 @@ export { ProgressBar } from './ProgressBar';
 export { Tabs } from './Tabs';
 export { Spinner } from './Spinner';
 export { EmptyState } from './EmptyState';
+export { Pagination } from './Pagination';
