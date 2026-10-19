@@ -1,5 +1,5 @@
 import type { CommunityPost, CommunityReport } from '@/types/community';
-import { supabaseRest } from '@/lib/supabase-client';
+import { apiFetch } from '@/lib/api';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
@@ -9,23 +9,16 @@ let inMemoryReports: CommunityReport[] = [];
 
 export async function getPosts(): Promise<CommunityPost[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/community/admin/posts`);
+    const res = await apiFetch(`${API_BASE_URL}/community/admin/posts`);
     if (res.ok) {
       const data = await res.json();
-      if (data && Array.isArray(data.posts) && data.posts.length > 0) {
+      if (data && Array.isArray(data.posts)) {
         inMemoryPosts = data.posts;
         return data.posts;
       }
     }
   } catch (_) {
     // fallback
-  }
-
-  // Supabase direct fallback
-  const dbPosts = await supabaseRest<CommunityPost[]>('community_posts?select=*&order=created_at.desc');
-  if (dbPosts && Array.isArray(dbPosts) && dbPosts.length > 0) {
-    inMemoryPosts = dbPosts;
-    return dbPosts;
   }
 
   return inMemoryPosts;
@@ -47,7 +40,7 @@ export async function moderatePost(
   isModerated?: boolean,
 ): Promise<CommunityPost | undefined> {
   try {
-    const res = await fetch(`${API_BASE_URL}/community/admin/posts/${id}/moderate`, {
+    const res = await apiFetch(`${API_BASE_URL}/community/admin/posts/${id}/moderate`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(isModerated !== undefined ? { is_moderated: isModerated } : {}),
@@ -69,7 +62,7 @@ export async function moderatePost(
 
 export async function deletePost(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${API_BASE_URL}/community/admin/posts/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/community/admin/posts/${id}`, {
       method: 'DELETE',
     });
     if (res.ok) {
