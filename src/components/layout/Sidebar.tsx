@@ -12,142 +12,161 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   LogOut,
+  type LucideIcon,
 } from 'lucide-react';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { useAuth } from '@/context/AuthContext';
 import { useSupportWaitingCount } from '@/hooks/use-support-waiting-count';
 import { Avatar } from '@/components/ui';
+import { SIDEBAR_WIDTH } from './sidebar-width';
 import { SidebarNavItem } from './SidebarNavItem';
 
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', to: '/', perm: 'dashboard' },
-  { icon: Users, label: 'Utilisatrices', to: '/utilisatrices', perm: 'users_view' },
-  { icon: Briefcase, label: 'Candidatures', to: '/candidatures', perm: 'candidatures_view' },
-  { icon: PlayCircle, label: 'Ateliers', to: '/ateliers', perm: 'ateliers_view' },
-  { icon: BookOpen, label: 'Blog & Conseils', to: '/blog', perm: 'community_view' },
-  { icon: MessageSquare, label: 'Communauté', to: '/communaute', perm: 'community_view' },
-  { icon: LifeBuoy, label: 'Support', to: '/support', perm: 'support' },
-  { icon: CreditCard, label: 'Abonnements', to: '/abonnements', perm: 'subscriptions_view' },
+interface NavItem {
+  icon: LucideIcon;
+  label: string;
+  to: string;
+  perm?: string;
+}
+
+const navSections: { title: string; items: NavItem[] }[] = [
+  {
+    title: 'Menu',
+    items: [
+      { icon: LayoutDashboard, label: 'Dashboard', to: '/', perm: 'dashboard' },
+      { icon: Users, label: 'Utilisatrices', to: '/utilisatrices', perm: 'users_view' },
+      { icon: Briefcase, label: 'Candidatures', to: '/candidatures', perm: 'candidatures_view' },
+      { icon: CreditCard, label: 'Abonnements', to: '/abonnements', perm: 'subscriptions_view' },
+    ],
+  },
+  {
+    title: 'Contenu',
+    items: [
+      { icon: PlayCircle, label: 'Ateliers', to: '/ateliers', perm: 'ateliers_view' },
+      { icon: BookOpen, label: 'Blog & Conseils', to: '/blog', perm: 'community_view' },
+      { icon: MessageSquare, label: 'Communauté', to: '/communaute', perm: 'community_view' },
+    ],
+  },
+  {
+    title: 'Général',
+    items: [
+      { icon: LifeBuoy, label: 'Support', to: '/support', perm: 'support' },
+      { icon: Settings, label: 'Réglages', to: '/reglages', perm: 'settings_view' },
+    ],
+  },
 ];
+
+const ROLE_LABEL: Record<string, string> = {
+  super_admin: 'Super Admin',
+  admin: 'Administrateur',
+  moderator: 'Modérateur',
+  viewer: 'Lecteur',
+};
 
 export function Sidebar() {
   const { collapsed, toggle } = useSidebar();
   const { user, token, logout, permissions } = useAuth();
 
-  const visibleNavItems = navItems.filter((item) => {
-    if (!item.perm) return true;
-    if (permissions && typeof permissions[item.perm] === 'boolean') {
-      return permissions[item.perm];
-    }
-    return true;
-  });
-
-  const canViewSupport = visibleNavItems.some((item) => item.to === '/support');
-  const supportWaiting = useSupportWaitingCount(token, canViewSupport);
-
-  const canViewSettings =
+  // An item is hidden only when its permission is explicitly false.
+  const allowed = (item: NavItem) =>
+    !item.perm ||
     !permissions ||
-    typeof permissions.settings_view !== 'boolean' ||
-    permissions.settings_view;
+    typeof permissions[item.perm] !== 'boolean' ||
+    permissions[item.perm];
+
+  const sections = navSections
+    .map((section) => ({ ...section, items: section.items.filter(allowed) }))
+    .filter((section) => section.items.length > 0);
+
+  const canViewSupport = sections.some((s) => s.items.some((i) => i.to === '/support'));
+  const supportWaiting = useSupportWaitingCount(token, canViewSupport);
 
   return (
     <motion.aside
-      className="fixed left-0 top-0 h-screen bg-brown flex flex-col z-50 overflow-hidden"
-      animate={{ width: collapsed ? 64 : 240 }}
+      className="fixed left-4 top-4 bottom-4 z-50 flex flex-col overflow-hidden rounded-3xl bg-white shadow-card"
+      animate={{ width: collapsed ? SIDEBAR_WIDTH.collapsed - 32 : SIDEBAR_WIDTH.open - 32 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-6">
-        <div className="w-9 h-9 rounded-full bg-rose flex items-center justify-center shrink-0">
-          <span className="text-white font-heading text-lg font-bold leading-none">
-            N
-          </span>
+      {/* Logo and collapse toggle */}
+      <div
+        className={`flex items-center pt-7 pb-6 ${
+          collapsed ? 'flex-col gap-4 px-0' : 'justify-between px-6'
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-rose">
+            <span className="font-heading text-lg font-bold leading-none text-rose">N</span>
+          </div>
+          {!collapsed && (
+            <span className="font-heading text-2xl font-semibold tracking-wide text-brown whitespace-nowrap">
+              NAYHA
+            </span>
+          )}
         </div>
-        {!collapsed && (
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="font-heading text-xl text-cream font-semibold tracking-wide whitespace-nowrap"
-          >
-            NAYHA
-          </motion.span>
-        )}
+        <button
+          onClick={toggle}
+          className="rounded-lg p-1.5 text-muted transition-colors hover:bg-cream hover:text-brown cursor-pointer"
+          aria-label={collapsed ? 'Ouvrir le menu' : 'Réduire le menu'}
+          title={collapsed ? 'Ouvrir le menu' : 'Réduire le menu'}
+        >
+          {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+        </button>
       </div>
 
-      {/* Divider */}
-      <div className="mx-4 border-t border-white/10" />
-
       {/* Navigation */}
-      <nav className="flex-1 flex flex-col gap-1 px-2 py-4 overflow-y-auto">
-        {visibleNavItems.map((item) => (
-          <SidebarNavItem
-            key={item.to}
-            icon={item.icon}
-            label={item.label}
-            to={item.to}
-            collapsed={collapsed}
-            badge={item.to === '/support' ? supportWaiting : undefined}
-          />
+      <nav className={`flex-1 overflow-y-auto overflow-x-hidden ${collapsed ? 'px-3' : 'px-4'}`}>
+        {sections.map((section, index) => (
+          <div key={section.title} className={index > 0 ? 'mt-7' : ''}>
+            {collapsed ? (
+              index > 0 && <div className="mx-auto mb-4 h-px w-8 bg-gray-200" />
+            ) : (
+              <p className="mb-2 px-3 text-xs font-medium uppercase tracking-[0.12em] text-muted-light">
+                {section.title}
+              </p>
+            )}
+            <div className="flex flex-col gap-1">
+              {section.items.map((item) => (
+                <SidebarNavItem
+                  key={item.to}
+                  icon={item.icon}
+                  label={item.label}
+                  to={item.to}
+                  collapsed={collapsed}
+                  badge={item.to === '/support' ? supportWaiting : undefined}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 
-      {/* Bottom section */}
-      <div className="px-2 pb-4 flex flex-col gap-1">
-        {/* Divider */}
-        <div className="mx-2 mb-2 border-t border-white/10" />
-
-        {/* Settings */}
-        {canViewSettings && (
-          <SidebarNavItem
-            icon={Settings}
-            label="Réglages"
-            to="/reglages"
-            collapsed={collapsed}
-          />
-        )}
-
-        {/* Current user & logout */}
-        {user && (
+      {/* Current admin */}
+      {user && (
+        <div className={`p-3 ${collapsed ? '' : 'px-4 pb-4'}`}>
           <div
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/5 mx-1 mb-1 ${
-              collapsed ? 'justify-center px-0' : ''
+            className={`flex items-center gap-3 rounded-2xl bg-cream p-3 ${
+              collapsed ? 'flex-col px-0 py-3' : ''
             }`}
           >
             <Avatar name={user.name} size="sm" />
             {!collapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-cream truncate">
-                  {user.name}
-                </p>
-                <p className="text-[10px] text-cream/50 capitalize truncate">
-                  {user.role.replace('_', ' ')}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-brown">{user.name}</p>
+                <p className="truncate text-xs text-muted">
+                  {ROLE_LABEL[user.role] ?? user.role}
                 </p>
               </div>
             )}
             <button
               onClick={logout}
               title="Se déconnecter"
-              className="text-cream/50 hover:text-rose transition-colors cursor-pointer p-1"
+              aria-label="Se déconnecter"
+              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white hover:text-rose cursor-pointer"
             >
               <LogOut size={16} />
             </button>
           </div>
-        )}
-
-        {/* Collapse toggle */}
-        <button
-          onClick={toggle}
-          className="flex items-center gap-3 px-4 py-2 rounded-r-lg text-cream/50 hover:text-white hover:bg-white/5 transition-all duration-200 cursor-pointer"
-          style={collapsed ? { justifyContent: 'center', paddingInline: 0 } : undefined}
-          aria-label={collapsed ? 'Ouvrir le menu' : 'Réduire le menu'}
-        >
-          {collapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
-          {!collapsed && (
-            <span className="text-sm font-medium whitespace-nowrap">Réduire</span>
-          )}
-        </button>
-      </div>
+        </div>
+      )}
     </motion.aside>
   );
 }

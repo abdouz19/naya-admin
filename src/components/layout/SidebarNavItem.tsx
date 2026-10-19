@@ -21,27 +21,44 @@ export function SidebarNavItem({ icon: Icon, label, to, collapsed, badge }: Side
       title={collapsed ? label : undefined}
       className={({ isActive }) =>
         [
-          'relative flex items-center gap-3 px-4 py-2.5 rounded-r-lg transition-all duration-200',
-          isActive
-            ? 'bg-brown-light/20 text-white border-l-3 border-rose'
-            : 'text-cream/70 hover:text-white hover:bg-white/5 border-l-3 border-transparent',
-          collapsed ? 'justify-center px-0' : '',
+          'group relative flex items-center gap-3 rounded-xl py-2.5 transition-colors duration-200',
+          collapsed ? 'justify-center px-0' : 'px-3',
+          isActive ? 'text-brown' : 'text-muted hover:text-brown hover:bg-cream/70',
         ].join(' ')
       }
     >
-      <Icon size={20} className="shrink-0" />
-      {!collapsed && (
-        <span className="text-sm font-medium whitespace-nowrap overflow-hidden">
-          {label}
-        </span>
-      )}
-      {showBadge && !collapsed && (
-        <span className="ml-auto min-w-5 rounded-full bg-rose px-1.5 py-0.5 text-center text-[11px] font-semibold leading-none text-white">
-          {badgeText}
-        </span>
-      )}
-      {showBadge && collapsed && (
-        <span className="absolute right-2.5 top-1.5 h-2 w-2 rounded-full bg-rose" aria-label={`${badgeText} en attente`} />
+      {({ isActive }) => (
+        <>
+          {/* Accent bar on the sidebar's edge for the current page. */}
+          {isActive && (
+            <span className="absolute -left-4 top-1/2 h-8 w-1.5 -translate-y-1/2 rounded-r-full bg-rose" />
+          )}
+          <Icon
+            size={20}
+            strokeWidth={isActive ? 2.4 : 1.8}
+            className={`shrink-0 ${isActive ? 'text-rose' : ''}`}
+          />
+          {!collapsed && (
+            <span
+              className={`text-[15px] whitespace-nowrap overflow-hidden ${
+                isActive ? 'font-semibold' : 'font-normal'
+              }`}
+            >
+              {label}
+            </span>
+          )}
+          {showBadge && !collapsed && (
+            <span className="ml-auto min-w-6 rounded-md bg-brown px-1.5 py-1 text-center text-[11px] font-semibold leading-none text-cream">
+              {badgeText}
+            </span>
+          )}
+          {showBadge && collapsed && (
+            <span
+              className="absolute right-3 top-1.5 h-2 w-2 rounded-full bg-rose"
+              aria-label={`${badgeText} en attente`}
+            />
+          )}
+        </>
       )}
     </NavLink>
   );

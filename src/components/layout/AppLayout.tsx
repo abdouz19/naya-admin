@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { Sidebar } from './Sidebar';
+import { SIDEBAR_WIDTH } from './sidebar-width';
 import { Header } from './Header';
 import { PageContainer } from './PageContainer';
 
@@ -29,7 +30,9 @@ export function AppLayout() {
 
       <main
         className="flex-1 flex flex-col min-h-screen transition-all duration-300"
-        style={{ marginLeft: collapsed ? 64 : 240 }}
+        style={{
+          marginLeft: collapsed ? SIDEBAR_WIDTH.collapsed : SIDEBAR_WIDTH.open,
+        }}
       >
         <Header title={title} />
 
