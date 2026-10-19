@@ -16,9 +16,11 @@ export function Header() {
   return (
     <header className="flex items-center justify-between rounded-[18px] border border-line bg-white px-6 py-3 shadow-card">
       <Link to="/" className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-brown shadow-sm">
-          <span className="font-heading text-lg font-bold leading-none text-rose-light">N</span>
-        </div>
+        <img
+          src="/nayha-logo.png"
+          alt="NAYHA"
+          className="h-10 w-10 rounded-xl shadow-sm"
+        />
         <span className="font-body text-[17px] font-bold tracking-tight text-ink">
           NAYHA <span className="text-rose">Admin</span>
         </span>
