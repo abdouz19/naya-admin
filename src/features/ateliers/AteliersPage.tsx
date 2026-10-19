@@ -12,10 +12,10 @@ import {
   User,
   Link2,
 } from '@/components/icons';
-import { Card, Spinner, Stat, Button, Modal, Input, Select } from '@/components/ui';
+import { Card, Spinner, Stat, Button, Modal, Input, Select, Pagination } from '@/components/ui';
 import { useService } from '@/hooks/use-service';
 import {
-  getAteliers,
+  getAteliersPage,
   getAtelierStats,
   addAtelier,
   updateAtelier,
@@ -23,6 +23,8 @@ import {
 } from '@/services/ateliers.service';
 import type { AtelierVideo, AtelierStats } from '@/types/atelier';
 import { formatNumber, formatPercent } from '@/lib/format';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import type { Paginated } from '@/types/pagination';
 import { AtelierCard } from './AtelierCard';
 import { AtelierCompletionChart } from './AtelierCompletionChart';
 
@@ -82,12 +84,36 @@ const emptyForm: AtelierFormData = {
 
 export default function AteliersPage() {
   const statsFn = useCallback(() => getAtelierStats(), []);
-  const ateliersFn = useCallback(() => getAteliers(), []);
   const { data: stats, loading: loadingStats, refetch: refetchStats } = useService<AtelierStats[]>(statsFn);
-  const { data: ateliers, loading: loadingAteliers, refetch: refetchAteliers } = useService<AtelierVideo[]>(ateliersFn);
 
   const [selectedFilter, setSelectedFilter] = useState('tous');
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(searchQuery);
+
+  // Searching or filtering starts again from the first page.
+  const changeFilter =
+    <T,>(set: (value: T) => void) =>
+    (value: T) => {
+      set(value);
+      setPage(1);
+    };
+
+  const ateliersFn = useCallback(
+    () =>
+      getAteliersPage(page, {
+        search: debouncedSearch,
+        category: selectedFilter,
+      }),
+    [page, debouncedSearch, selectedFilter],
+  );
+  const {
+    data: ateliersPage,
+    loading: loadingAteliers,
+    refetch: refetchAteliers,
+  } = useService<Paginated<AtelierVideo>>(ateliersFn);
+  const ateliers = useMemo(() => ateliersPage?.items ?? [], [ateliersPage]);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editingAtelier, setEditingAtelier] = useState<AtelierVideo | null>(null);
   const [form, setForm] = useState<AtelierFormData>(emptyForm);
@@ -97,7 +123,7 @@ export default function AteliersPage() {
     setEditingAtelier(null);
     setForm({
       ...emptyForm,
-      order: (ateliers?.length ?? 0) + 1,
+      order: (ateliersPage?.total ?? stats?.length ?? 0) + 1,
     });
     setModalOpen(true);
   };
@@ -173,36 +199,33 @@ export default function AteliersPage() {
       setSaving(false);
       setModalOpen(false);
       refetchStats();
-      refetchAteliers();
+      // Last atelier of a page: show the previous page.
+      if (ateliers.length === 1 && page > 1) setPage(page - 1);
+      else refetchAteliers();
     }
   };
 
-  const filteredStats = useMemo(() => {
-    if (!stats) return [];
-    let list = stats;
-
-    if (selectedFilter !== 'tous') {
-      list = list.filter(
-        (s) => s.category === selectedFilter || s.palier === selectedFilter,
-      );
-    }
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      list = list.filter((s) => {
-        const atelier = ateliers?.find((a) => a.id === s.id);
-        return (
-          s.titre.toLowerCase().includes(q) ||
-          (s.category && s.category.toLowerCase().includes(q)) ||
-          (s.step_tag && s.step_tag.toLowerCase().includes(q)) ||
-          (atelier?.description && atelier.description.toLowerCase().includes(q)) ||
-          (atelier?.speaker_name && atelier.speaker_name.toLowerCase().includes(q))
-        );
-      });
-    }
-
-    return list;
-  }, [stats, ateliers, selectedFilter, searchQuery]);
+  // Cards of this page: each atelier with its viewing figures.
+  const pageCards = useMemo(
+    () =>
+      ateliers.map((atelier) => {
+        const found = stats?.find((st) => st.id === atelier.id);
+        const cardStats: AtelierStats = found ?? {
+          id: atelier.id,
+          titre: atelier.titre,
+          palier: atelier.palier,
+          category: atelier.category,
+          step_tag: atelier.step_tag,
+          duree: atelier.duree,
+          watch_count: 0,
+          unique_viewers: 0,
+          completion_rate: 0,
+          is_active: atelier.is_active,
+        };
+        return { atelier, stats: cardStats };
+      }),
+    [ateliers, stats],
+  );
 
   const kpis = useMemo(() => {
     if (!stats || stats.length === 0) {
@@ -223,7 +246,7 @@ export default function AteliersPage() {
     };
   }, [stats]);
 
-  const loading = loadingStats || loadingAteliers;
+  const loading = (loadingStats && !stats) || (loadingAteliers && !ateliersPage);
 
   if (loading) {
     return (
@@ -271,7 +294,7 @@ export default function AteliersPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="font-heading text-lg font-semibold text-brown">
-              Vidéos & Ateliers Thématiques ({filteredStats.length})
+              Vidéos & Ateliers Thématiques ({ateliersPage?.total ?? 0})
             </h2>
             <p className="text-xs text-muted">
               Gérez les ateliers vidéo interactifs de l'application mobile (Emploi, Reconversion, Confiance en soi).
@@ -291,7 +314,7 @@ export default function AteliersPage() {
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 flex-1">
             <button
-              onClick={() => setSelectedFilter('tous')}
+              onClick={() => changeFilter(setSelectedFilter)('tous')}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 selectedFilter === 'tous'
                   ? 'bg-rose text-white shadow-xs'
@@ -306,7 +329,7 @@ export default function AteliersPage() {
               return (
                 <button
                   key={opt.value}
-                  onClick={() => setSelectedFilter(opt.value)}
+                  onClick={() => changeFilter(setSelectedFilter)(opt.value)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap ${
                     selectedFilter === opt.value
                       ? 'bg-rose text-white shadow-xs'
@@ -324,7 +347,7 @@ export default function AteliersPage() {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => changeFilter(setSearchQuery)(e.target.value)}
               placeholder="Rechercher un atelier..."
               className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-gray-200 focus:border-rose focus:ring-1 focus:ring-rose/20 outline-none text-brown"
             />
@@ -332,7 +355,7 @@ export default function AteliersPage() {
         </div>
 
         {/* Grid */}
-        {filteredStats.length === 0 ? (
+        {pageCards.length === 0 ? (
           <div className="text-center py-12 border border-dashed border-gray-200 rounded-xl">
             <Film className="mx-auto text-muted mb-2" size={32} />
             <p className="text-sm font-medium text-brown">Aucun atelier trouvé</p>
@@ -340,15 +363,21 @@ export default function AteliersPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredStats.map((s) => {
-              const atelier = ateliers?.find((a) => a.id === s.id);
-              return (
-                <div key={s.id} onClick={() => atelier && openEdit(atelier)}>
-                  <AtelierCard stats={s} atelier={atelier} />
-                </div>
-              );
-            })}
+            {pageCards.map(({ atelier, stats: cardStats }) => (
+              <div key={atelier.id} onClick={() => openEdit(atelier)}>
+                <AtelierCard stats={cardStats} atelier={atelier} />
+              </div>
+            ))}
           </div>
+        )}
+
+        {ateliersPage && (
+          <Pagination
+            page={ateliersPage.page}
+            pageSize={ateliersPage.pageSize}
+            total={ateliersPage.total}
+            onPageChange={setPage}
+          />
         )}
       </div>
 

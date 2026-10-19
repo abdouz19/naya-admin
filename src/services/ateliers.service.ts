@@ -1,25 +1,53 @@
 import { mockAteliers, mockWatchRecords } from '@/data/mock-ateliers';
 import type { AtelierVideo, AtelierWatchRecord, AtelierStats } from '@/types/atelier';
 import { apiFetch } from '@/lib/api';
+import { PAGE_SIZE, type Paginated } from '@/types/pagination';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
 
 let inMemoryAteliers = [...mockAteliers];
 
-export async function getAteliers(): Promise<AtelierVideo[]> {
+export interface AtelierListFilters {
+  search?: string;
+  category?: string;
+}
+
+/** One page of ateliers, searched and filtered by the API. */
+export async function getAteliersPage(
+  page: number,
+  filters: AtelierListFilters = {},
+  pageSize = PAGE_SIZE,
+): Promise<Paginated<AtelierVideo>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+  if (filters.search?.trim()) params.set('search', filters.search.trim());
+  if (filters.category && filters.category !== 'tous') {
+    params.set('category', filters.category);
+  }
+  const res = await apiFetch(`${API_BASE_URL}/ateliers/admin/all?${params}`, {
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error('Les ateliers n’ont pas pu être chargés.');
+  return res.json();
+}
+
+/** Every atelier matching the filters (stats fallback). */
+export async function getAteliers(
+  filters: AtelierListFilters = {},
+): Promise<AtelierVideo[]> {
   try {
-    const res = await apiFetch(`${API_BASE_URL}/ateliers/admin/all`, {
-      cache: 'no-store',
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        inMemoryAteliers = data;
-        return data;
-      }
+    const all: AtelierVideo[] = [];
+    for (let page = 1; page <= 100; page++) {
+      const result = await getAteliersPage(page, filters, 100);
+      all.push(...result.items);
+      if (all.length >= result.total || result.items.length === 0) break;
     }
-  } catch (_) {
+    inMemoryAteliers = all;
+    return all;
+  } catch {
     // fallback
   }
   return [...inMemoryAteliers];
