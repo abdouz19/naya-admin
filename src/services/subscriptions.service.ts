@@ -1,19 +1,14 @@
-import { mockSubscriptions, getMockRevenueStats } from '@/data/mock-subscriptions';
-import type { Subscription, SubscriptionStatus, RevenueStats } from '@/types/subscription';
+import { apiFetch } from '@/lib/api';
+import type { SubscriptionsOverview } from '@/types/subscription';
 
-const delay = <T>(data: T): Promise<T> =>
-  new Promise((resolve) => setTimeout(() => resolve(data), 120));
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'https://nayha-server-kpw2.onrender.com';
 
-export function getSubscriptions(): Promise<Subscription[]> {
-  return delay([...mockSubscriptions]);
-}
-
-export function getRevenueStats(): Promise<RevenueStats> {
-  return delay(getMockRevenueStats());
-}
-
-export function getSubscriptionsByStatus(
-  status: SubscriptionStatus,
-): Promise<Subscription[]> {
-  return delay(mockSubscriptions.filter((s) => s.status === status));
+/** Subscribers and figures, as RevenueCat reported them to the API. */
+export async function getSubscriptionsOverview(): Promise<SubscriptionsOverview> {
+  const res = await apiFetch(`${API_BASE_URL}/subscriptions/admin`);
+  if (!res.ok) {
+    throw new Error('Les abonnements n’ont pas pu être chargés.');
+  }
+  return res.json();
 }

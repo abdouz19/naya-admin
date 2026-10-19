@@ -1,56 +1,47 @@
-export type SubscriptionPlan = 'mensuel' | 'trimestriel' | 'annuel';
-export type SubscriptionStatus = 'active' | 'cancelled' | 'expired' | 'trial';
+export type SubscriptionDuration = 'monthly' | 'quarterly' | 'annual';
 
-export interface Subscription {
-  id: string;
-  user_id: string;
-  user_name: string;
-  user_email: string;
-  plan: SubscriptionPlan;
-  status: SubscriptionStatus;
-  amount: number; // monthly equivalent in EUR
-  started_at: string;
-  expires_at: string;
-  cancelled_at: string | null;
+export interface AdminSubscription {
+  userId: string;
+  name: string;
+  email: string | null;
+  parcoursType: string | null;
+  status: 'active' | 'expired';
+  duration: SubscriptionDuration | null;
+  durationLabel: string | null;
+  price: number | null;
+  /** app_store, play_store, test_store… as reported by RevenueCat. */
+  store: string | null;
+  /** False once auto-renewal was turned off in the store. */
+  willRenew: boolean | null;
+  startedAt: string | null;
+  expiresAt: string | null;
 }
 
-export interface RevenueStats {
-  mrr: number; // Monthly Recurring Revenue in EUR
-  arr: number; // Annual Recurring Revenue
-  totalRevenue: number; // All-time
-  activeSubscriptions: number;
-  churnRate: number; // 0-1
-  averageRevenuePerUser: number;
-  trialConversions: number; // percentage 0-1
-  revenueByMonth: { month: string; revenue: number }[];
-  planDistribution: { plan: string; count: number }[];
-  statusDistribution: { status: string; count: number }[];
-  newSubscriptionsThisMonth: number;
-  cancelledThisMonth: number;
+export interface SubscriptionsOverview {
+  stats: {
+    active: number;
+    cancelling: number;
+    expired: number;
+    estimatedMonthlyRevenue: number;
+    byDuration: { duration: SubscriptionDuration; label: string; count: number }[];
+    unknownDuration: number;
+  };
+  subscriptions: AdminSubscription[];
 }
 
-export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
-  mensuel: 'Mensuel',
-  trimestriel: 'Trimestriel',
-  annuel: 'Annuel',
+export const STORE_LABELS: Record<string, string> = {
+  app_store: 'App Store',
+  mac_app_store: 'App Store',
+  play_store: 'Google Play',
+  test_store: 'Test Store',
+  rc_billing: 'Web',
+  stripe: 'Web',
+  promotional: 'Offert',
 };
 
-export const PLAN_PRICES: Record<SubscriptionPlan, number> = {
-  mensuel: 29.90,
-  trimestriel: 24.90, // per month
-  annuel: 19.90, // per month
-};
-
-export const STATUS_LABELS: Record<SubscriptionStatus, string> = {
-  active: 'Actif',
-  cancelled: 'Resilie',
-  expired: 'Expire',
-  trial: 'Essai',
-};
-
-export const STATUS_BADGE_VARIANTS: Record<SubscriptionStatus, 'green' | 'danger' | 'muted' | 'gold'> = {
-  active: 'green',
-  cancelled: 'danger',
-  expired: 'muted',
-  trial: 'gold',
+export const PARCOURS_LABELS: Record<string, string> = {
+  retourEmploi: 'Retour à l’emploi',
+  reconversion: 'Reconversion',
+  creationActivite: 'Création d’activité',
+  coaching: 'Coaching',
 };
