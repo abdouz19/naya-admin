@@ -1,35 +1,51 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Spinner, Tabs, Modal, Button } from '@/components/ui';
+import { Spinner, Tabs, Modal, Button, Pagination, SearchInput } from '@/components/ui';
 import { useService } from '@/hooks/use-service';
-import { getPosts, moderatePost, deletePost } from '@/services/community.service';
+import {
+  getPostsPage,
+  moderatePost,
+  deletePost,
+  type PostFilter,
+  type PostsPage,
+} from '@/services/community.service';
 import type { CommunityPost } from '@/types/community';
 import { PostCard } from './PostCard';
 import { ReportsList } from './ReportsList';
 
 export default function CommunityPage() {
-  const postsFn = useCallback(() => getPosts(), []);
-  const { data: fetchedPosts, loading, refetch } = useService<CommunityPost[]>(postsFn);
+  const [activeTab, setActiveTab] = useState<PostFilter>('all');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
+  const postsFn = useCallback(
+    () => getPostsPage(page, { filter: activeTab, search }),
+    [page, activeTab, search],
+  );
+  const { data: postsPage, loading, refetch } = useService<PostsPage>(postsFn);
+
+  // Local copy of the page, so moderation and deletion show at once.
   const [posts, setPosts] = useState<CommunityPost[] | null>(null);
-  const [activeTab, setActiveTab] = useState('all');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
-  // Sync fetched data to local state (once loaded)
-  const currentPosts = useMemo(() => {
-    if (posts !== null) return posts;
-    if (fetchedPosts) return fetchedPosts;
-    return [];
-  }, [posts, fetchedPosts]);
+  const [syncedPage, setSyncedPage] = useState<PostsPage | null>(null);
 
-  // Initialize local state when data arrives
-  if (fetchedPosts && posts === null) {
-    setPosts(fetchedPosts);
+  // A new page arrived: show it. If the last post of a page was deleted,
+  // go back one page.
+  if (postsPage && postsPage !== syncedPage) {
+    setSyncedPage(postsPage);
+    setPosts(postsPage.items);
+    if (postsPage.items.length === 0 && page > 1) setPage(page - 1);
   }
 
-  const reportedPosts = useMemo(
-    () => currentPosts.filter((p) => (p.reports_count ?? 0) > 0),
-    [currentPosts],
-  );
+  const currentPosts = posts ?? postsPage?.items ?? [];
+
+  // Searching or changing tab starts again from the first page.
+  const changeFilter =
+    <T,>(set: (value: T) => void) =>
+    (value: T) => {
+      set(value);
+      setPage(1);
+    };
 
   const handleModerate = useCallback(async (id: string) => {
     setPosts((prev) =>
@@ -64,13 +80,13 @@ export default function CommunityPage() {
 
   const tabs = useMemo(
     () => [
-      { key: 'all', label: 'Tous les posts', count: currentPosts.length },
-      { key: 'reported', label: 'Signales', count: reportedPosts.length },
+      { key: 'all', label: 'Tous les posts', count: postsPage?.counts.all },
+      { key: 'reported', label: 'Signales', count: postsPage?.counts.reported },
     ],
-    [currentPosts.length, reportedPosts.length],
+    [postsPage],
   );
 
-  if (loading) {
+  if (loading && !postsPage) {
     return (
       <div className="flex h-96 items-center justify-center">
         <Spinner size="lg" />
@@ -80,7 +96,18 @@ export default function CommunityPage() {
 
   return (
     <div className="space-y-6">
-      <Tabs tabs={tabs} activeKey={activeTab} onChange={setActiveTab} />
+      <Tabs
+        tabs={tabs}
+        activeKey={activeTab}
+        onChange={(key) => changeFilter(setActiveTab)(key as PostFilter)}
+      />
+
+      <SearchInput
+        value={search}
+        onSearch={changeFilter(setSearch)}
+        placeholder="Rechercher un post ou une autrice..."
+        className="max-w-md"
+      />
 
       {activeTab === 'all' && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -100,6 +127,15 @@ export default function CommunityPage() {
           posts={currentPosts}
           onModerate={handleModerate}
           onDelete={handleDeleteRequest}
+        />
+      )}
+
+      {postsPage && (
+        <Pagination
+          page={postsPage.page}
+          pageSize={postsPage.pageSize}
+          total={postsPage.total}
+          onPageChange={setPage}
         />
       )}
 
