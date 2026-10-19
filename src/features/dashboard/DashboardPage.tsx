@@ -49,27 +49,21 @@ export default function DashboardPage() {
           label="Utilisatrices"
           value={formatNumber(kpis?.totalUsers ?? 0)}
           icon={Users}
-          sparklineData={sparklines?.usersPerDay}
-          sparklineColor={CHART_COLORS.rose}
         />
         <KpiCard
           label="Actives cette semaine"
           value={formatNumber(kpis?.activeThisWeek ?? 0)}
           icon={Activity}
-          sparklineColor={CHART_COLORS.gold}
         />
         <KpiCard
           label="Candidatures"
           value={formatNumber(kpis?.totalCandidatures ?? 0)}
           icon={Briefcase}
-          sparklineData={sparklines?.candidaturesPerDay}
-          sparklineColor={CHART_COLORS.green}
         />
         <KpiCard
           label="Abonnements actifs"
           value={formatNumber(kpis?.paidUsers ?? 0)}
           icon={CreditCard}
-          sparklineColor={CHART_COLORS.rose}
         />
       </div>
 

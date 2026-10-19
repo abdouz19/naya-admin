@@ -1,7 +1,6 @@
 import { type ElementType } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { Card } from '@/components/ui';
-import { SparklineChart } from '@/components/charts';
 import { cn } from '@/lib/cn';
 
 interface KpiCardProps {
@@ -9,8 +8,6 @@ interface KpiCardProps {
   value: string;
   delta?: number;
   icon: ElementType;
-  sparklineData?: { value: number }[];
-  sparklineColor?: string;
 }
 
 export function KpiCard({
@@ -18,14 +15,12 @@ export function KpiCard({
   value,
   delta,
   icon: Icon,
-  sparklineData,
-  sparklineColor,
 }: KpiCardProps) {
   const isPositive = delta !== undefined ? delta >= 0 : true;
 
   return (
     <Card noPadding className="overflow-hidden">
-      <div className="px-5 pt-5 pb-3">
+      <div className="p-5">
         {/* Top row: icon + value + delta */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -60,18 +55,6 @@ export function KpiCard({
         {/* Label */}
         <p className="mt-1 text-sm text-muted">{label}</p>
       </div>
-
-      {/* Sparkline spanning full width */}
-      {sparklineData && sparklineData.length > 0 && (
-        <div className="w-full">
-          <SparklineChart
-            data={sparklineData}
-            color={sparklineColor}
-            width={320}
-            height={48}
-          />
-        </div>
-      )}
     </Card>
   );
 }
