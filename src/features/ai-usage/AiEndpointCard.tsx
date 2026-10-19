@@ -1,4 +1,4 @@
-import { Brain } from 'lucide-react';
+import { Brain } from '@/components/icons';
 import { Card } from '@/components/ui';
 import { formatNumber } from '@/lib/format';
 

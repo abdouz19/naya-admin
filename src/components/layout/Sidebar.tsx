@@ -11,7 +11,7 @@ import {
   LogOut,
   ShieldCheck,
   type LucideIcon,
-} from 'lucide-react';
+} from '@/components/icons';
 import { useAuth } from '@/context/AuthContext';
 import { useSupportWaitingCount } from '@/hooks/use-support-waiting-count';
 import { SidebarNavItem } from './SidebarNavItem';

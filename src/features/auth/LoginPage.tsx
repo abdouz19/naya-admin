@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, Mail, Eye, EyeOff, AlertCircle, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff, AlertCircle, ShieldCheck, ArrowRight } from '@/components/icons';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui';
 

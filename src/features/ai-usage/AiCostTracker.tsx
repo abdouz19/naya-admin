@@ -1,4 +1,4 @@
-import { DollarSign } from 'lucide-react';
+import { DollarSign } from '@/components/icons';
 import { Card } from '@/components/ui';
 import { formatCurrency, formatNumber } from '@/lib/format';
 

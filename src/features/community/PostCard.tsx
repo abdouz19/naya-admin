@@ -1,4 +1,4 @@
-import { Heart, Flag, EyeOff, Eye, Trash2, MessageSquare } from 'lucide-react';
+import { Heart, Flag, EyeOff, Eye, Trash2, MessageSquare } from '@/components/icons';
 import { Card, Avatar, Badge, Button } from '@/components/ui';
 import { formatRelative } from '@/lib/format';
 import type { CommunityPost } from '@/types/community';

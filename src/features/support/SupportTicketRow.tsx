@@ -1,4 +1,4 @@
-import { Clock } from 'lucide-react';
+import { Clock } from '@/components/icons';
 import { Badge } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { formatElapsed, formatRelative } from '@/lib/format';

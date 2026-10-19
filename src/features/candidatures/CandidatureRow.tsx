@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { Check } from '@/components/icons';
 import { Table, Badge } from '@/components/ui';
 import { formatDate } from '@/lib/format';
 import type { Candidature, CandidatureStatut } from '@/types/candidature';

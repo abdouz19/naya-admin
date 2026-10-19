@@ -1,5 +1,5 @@
 import { useState, type KeyboardEvent } from 'react';
-import { Send } from 'lucide-react';
+import { Send } from '@/components/icons';
 import { Button } from '@/components/ui';
 
 interface SupportComposerProps {

@@ -10,7 +10,7 @@ import {
   CalendarDays,
   ShieldBan,
   ShieldCheck,
-} from 'lucide-react';
+} from '@/components/icons';
 import { Avatar, Badge, Button, ProgressBar } from '@/components/ui';
 import { formatDate } from '@/lib/format';
 import { blockUser, unblockUser } from '@/services/users.service';

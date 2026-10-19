@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Users, Activity, Briefcase, CreditCard } from 'lucide-react';
+import { Users, Activity, Briefcase, CreditCard } from '@/components/icons';
 import { Card, Spinner } from '@/components/ui';
 import { LineChart } from '@/components/charts';
 import { useService } from '@/hooks/use-service';

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Sparkles, MessageCircle, HeartHandshake } from 'lucide-react';
+import { Plus, Trash2, Sparkles, MessageCircle, HeartHandshake } from '@/components/icons';
 import { Modal, Input, Select, Button } from '@/components/ui';
 import type { BlogArticle, BlogSection } from '@/types/blog';
 

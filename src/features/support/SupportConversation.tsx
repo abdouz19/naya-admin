@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2 } from '@/components/icons';
 import { Badge, Button } from '@/components/ui';
 import type { SupportTicketDetail } from '@/types/support';
 import {

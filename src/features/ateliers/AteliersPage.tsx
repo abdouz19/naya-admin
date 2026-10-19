@@ -11,7 +11,7 @@ import {
   BookOpen,
   User,
   Link2,
-} from 'lucide-react';
+} from '@/components/icons';
 import { Card, Spinner, Stat, Button, Modal, Input, Select } from '@/components/ui';
 import { useService } from '@/hooks/use-service';
 import {

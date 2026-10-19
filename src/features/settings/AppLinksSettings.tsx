@@ -8,7 +8,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Globe,
-} from 'lucide-react';
+} from '@/components/icons';
 import { Badge, Button } from '@/components/ui';
 import type { AppLink } from '@/types/app-link';
 import {

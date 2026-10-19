@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Shield } from 'lucide-react';
+import { Shield } from '@/components/icons';
 import { EmptyState } from '@/components/ui';
 import type { CommunityPost } from '@/types/community';
 import { PostCard } from './PostCard';

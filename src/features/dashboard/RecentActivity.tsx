@@ -1,4 +1,4 @@
-import { UserPlus, Briefcase, Brain, MessageSquare, Play } from 'lucide-react';
+import { UserPlus, Briefcase, Brain, MessageSquare, Play } from '@/components/icons';
 import { Card, Avatar } from '@/components/ui';
 import { formatRelative } from '@/lib/format';
 import type { ActivityItem } from '@/services/dashboard.service';

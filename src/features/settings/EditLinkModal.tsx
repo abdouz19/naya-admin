@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ExternalLink, RotateCcw } from 'lucide-react';
+import { ExternalLink, RotateCcw } from '@/components/icons';
 import { Button, Input, Modal, Badge } from '@/components/ui';
 import type { AppLink } from '@/types/app-link';
 

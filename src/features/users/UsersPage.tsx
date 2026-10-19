@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Users, Activity, CreditCard, ClipboardCheck, Download } from 'lucide-react';
+import { Users, Activity, CreditCard, ClipboardCheck, Download } from '@/components/icons';
 import { Table, Stat, Spinner, Card, EmptyState, Button } from '@/components/ui';
 import { useService } from '@/hooks/use-service';
 import { getUsers, getUserStats, type UserStats } from '@/services/users.service';

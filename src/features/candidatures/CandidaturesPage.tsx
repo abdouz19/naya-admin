@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Briefcase, Download } from 'lucide-react';
+import { Briefcase, Download } from '@/components/icons';
 import { Table, Spinner, SearchInput, Select, Card, EmptyState, Button } from '@/components/ui';
 import { useService } from '@/hooks/use-service';
 import {

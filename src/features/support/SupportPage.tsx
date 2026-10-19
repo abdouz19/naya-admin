@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Inbox, MessagesSquare, RefreshCw, TriangleAlert } from 'lucide-react';
+import { Inbox, MessagesSquare, RefreshCw, TriangleAlert } from '@/components/icons';
 import { Button, Card, EmptyState, Spinner, Tabs } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/cn';

@@ -1,4 +1,4 @@
-import { Eye, Users, Video, ExternalLink, UserCheck } from 'lucide-react';
+import { Eye, Users, Video, ExternalLink, UserCheck } from '@/components/icons';
 import { Card, Badge, ProgressBar } from '@/components/ui';
 import { formatNumber, formatPercent } from '@/lib/format';
 import type { AtelierStats, AtelierVideo } from '@/types/atelier';

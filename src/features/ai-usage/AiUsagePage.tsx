@@ -1,4 +1,4 @@
-import { Brain } from 'lucide-react';
+import { Brain } from '@/components/icons';
 import { Card, EmptyState } from '@/components/ui';
 
 export default function AiUsagePage() {

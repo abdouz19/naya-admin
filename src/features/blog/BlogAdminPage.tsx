@@ -10,7 +10,7 @@ import {
   Edit2,
   Trash2,
   Search,
-} from 'lucide-react';
+} from '@/components/icons';
 import { Card, Spinner, Stat, Button, Badge } from '@/components/ui';
 import { useService } from '@/hooks/use-service';
 import {

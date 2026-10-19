@@ -1,5 +1,5 @@
 import { type ElementType } from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown } from '@/components/icons';
 import { cn } from '@/lib/cn';
 
 interface StatProps {

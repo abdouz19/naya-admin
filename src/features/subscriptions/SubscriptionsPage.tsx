@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { CreditCard, Euro, RefreshCcw, UserCheck, UserMinus, UserX } from 'lucide-react';
+import { CreditCard, Euro, RefreshCcw, UserCheck, UserMinus, UserX } from '@/components/icons';
 import {
   Avatar,
   Badge,

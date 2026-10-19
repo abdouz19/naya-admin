@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { Check } from '@/components/icons';
 import { Table, Avatar, Badge } from '@/components/ui';
 import { formatRelative } from '@/lib/format';
 import type { UserProfile } from '@/types/user';

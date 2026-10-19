@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search } from 'lucide-react';
+import { Search } from '@/components/icons';
 import { cn } from '@/lib/cn';
 import { Input } from './Input';
 

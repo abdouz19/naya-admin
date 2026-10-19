@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { UserPlus } from 'lucide-react';
+import { UserPlus } from '@/components/icons';
 import { Button, Modal, Table, Tabs } from '@/components/ui';
 import type { AdminRole, AdminUser, RolePermissions } from '@/types/admin';
 import {

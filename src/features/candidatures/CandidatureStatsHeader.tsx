@@ -1,4 +1,4 @@
-import { Briefcase, TrendingUp, Clock, CalendarCheck } from 'lucide-react';
+import { Briefcase, TrendingUp, Clock, CalendarCheck } from '@/components/icons';
 import { Card, Stat } from '@/components/ui';
 import { formatNumber, formatPercent } from '@/lib/format';
 import type { CandidatureStats } from '@/services/candidatures.service';

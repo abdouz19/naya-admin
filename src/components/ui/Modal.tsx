@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X } from '@/components/icons';
 import { cn } from '@/lib/cn';
 
 interface ModalProps {

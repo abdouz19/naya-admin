@@ -4,7 +4,7 @@ import {
   type TdHTMLAttributes,
   type HTMLAttributes,
 } from 'react';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown } from '@/components/icons';
 import { cn } from '@/lib/cn';
 
 /* ------------------------------------------------------------------ */
