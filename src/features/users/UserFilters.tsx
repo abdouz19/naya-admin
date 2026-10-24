@@ -45,6 +45,7 @@ export function UserFilters({
       <SearchInput
         value={search}
         onSearch={onSearchChange}
+        label="Recherche"
         placeholder="Rechercher une utilisatrice..."
         className="min-w-0"
       />

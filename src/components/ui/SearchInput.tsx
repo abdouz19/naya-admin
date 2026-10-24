@@ -6,6 +6,7 @@ import { Input } from './Input';
 interface SearchInputProps {
   value?: string;
   onSearch: (query: string) => void;
+  label?: string;
   placeholder?: string;
   className?: string;
   /** Debounce delay in ms (default 300) */
@@ -15,6 +16,7 @@ interface SearchInputProps {
 export function SearchInput({
   value: controlledValue,
   onSearch,
+  label,
   placeholder = 'Rechercher...',
   className,
   delay = 300,
@@ -44,6 +46,7 @@ export function SearchInput({
 
   return (
     <Input
+      label={label}
       icon={Search}
       placeholder={placeholder}
       value={displayValue}
