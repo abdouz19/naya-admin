@@ -41,15 +41,16 @@ export function UserFilters({
   onParcoursChange,
 }: UserFiltersProps) {
   return (
-    <div className="flex items-end gap-4">
+    <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <SearchInput
         value={search}
         onSearch={onSearchChange}
         placeholder="Rechercher une utilisatrice..."
-        className="flex-1"
+        className="min-w-0"
       />
 
       <Select
+        className="min-w-0"
         label="Diagnostic"
         options={diagnosticOptions}
         value={diagnosticFilter}
@@ -59,6 +60,7 @@ export function UserFilters({
       />
 
       <Select
+        className="min-w-0"
         label="Statut"
         options={paidOptions}
         value={paidFilter}
@@ -68,6 +70,7 @@ export function UserFilters({
       />
 
       <Select
+        className="min-w-0"
         label="Parcours"
         options={parcoursOptions}
         value={parcoursFilter}

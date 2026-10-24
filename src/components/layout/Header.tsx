@@ -19,7 +19,7 @@ export function Header({ isMobileNavOpen, onMenuClick }: HeaderProps) {
   const { user } = useAuth();
 
   return (
-    <header className="flex items-center justify-between rounded-[18px] border border-line bg-white px-4 py-3 shadow-card sm:px-6">
+    <header className="flex w-full min-w-0 max-w-full items-center justify-between rounded-[18px] border border-line bg-white px-4 py-3 shadow-card sm:px-6">
       <Link to="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3">
         <img
           src="/nayha-logo.png"
@@ -33,7 +33,7 @@ export function Header({ isMobileNavOpen, onMenuClick }: HeaderProps) {
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
         {user && (
-          <div className="flex items-center gap-2 rounded-full border border-line bg-canvas/60 py-1 pl-1 pr-2 sm:gap-2.5 sm:pr-4">
+          <div className="hidden items-center gap-2 rounded-full border border-line bg-canvas/60 py-1 pl-1 pr-2 min-[420px]:flex sm:gap-2.5 sm:pr-4">
             <Avatar name={user.name} size="sm" />
             <div className="hidden text-left leading-tight sm:block">
               <p className="max-w-36 truncate text-[13px] font-semibold text-ink">{user.name}</p>

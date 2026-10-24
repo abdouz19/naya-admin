@@ -115,12 +115,12 @@ export default function CandidaturesPage() {
       )}
 
       {/* Filters */}
-      <div className="flex items-end gap-4">
+      <div className="grid min-w-0 grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:flex lg:flex-wrap">
         <SearchInput
           value={search}
           onSearch={changeFilter(setSearch)}
           placeholder="Rechercher une candidature..."
-          className="flex-1"
+          className="min-w-0 lg:flex-1"
         />
 
         <Select

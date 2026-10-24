@@ -17,8 +17,8 @@ interface TableRootProps extends HTMLAttributes<HTMLTableElement> {
 
 function TableRoot({ className, children, ...props }: TableRootProps) {
   return (
-    <div className="w-full overflow-hidden rounded-[18px] border border-line bg-white shadow-card">
-      <table className={cn('w-full border-collapse', className)} {...props}>
+    <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-[18px] border border-line bg-white shadow-card">
+      <table className={cn('min-w-full border-collapse', className)} {...props}>
         {children}
       </table>
     </div>

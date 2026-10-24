@@ -42,9 +42,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-w-0 space-y-4 sm:space-y-6">
+    <div className="w-full min-w-0 max-w-full space-y-4 sm:space-y-6">
       {/* KPI cards */}
-      <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
+      <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:gap-6 xl:grid-cols-4">
         <KpiCard
           label="Utilisatrices"
           value={formatNumber(kpis?.totalUsers ?? 0)}
@@ -68,8 +68,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Bottom section: chart + activity */}
-      <div className="grid min-w-0 grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(240px,1fr)]">
-        <Card title="Activite des 30 derniers jours">
+      <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(240px,1fr)]">
+        <Card className="min-w-0" title="Activite des 30 derniers jours">
           {(sparklines?.activityPerDay || sparklines?.usersPerDay) ? (
             <LineChart
               data={sparklines.activityPerDay || sparklines.usersPerDay}

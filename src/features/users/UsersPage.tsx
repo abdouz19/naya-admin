@@ -146,8 +146,8 @@ export default function UsersPage() {
       </div>
 
       {/* Filters + Export */}
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex-1">
+      <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-end">
+        <div className="min-w-0 flex-1">
           <UserFilters
         search={search}
             onSearchChange={changeFilter(setSearch)}

@@ -101,7 +101,7 @@ export function UserDetailPanel({ user, onClose, onUserUpdated }: UserDetailPane
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 z-50 flex h-full w-[420px] flex-col bg-white shadow-modal"
+            className="fixed inset-y-0 left-0 right-0 z-50 flex h-dvh w-full max-w-[420px] flex-col bg-white shadow-modal sm:left-auto"
           >
             {/* Header */}
             <div className="border-b border-gray-200 p-6">
@@ -117,16 +117,16 @@ export function UserDetailPanel({ user, onClose, onUserUpdated }: UserDetailPane
                 </button>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex min-w-0 items-center gap-4">
                 <Avatar name={user.name} size="lg" />
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-brown">{user.name}</p>
+                    <p className="min-w-0 truncate font-medium text-brown">{user.name}</p>
                     {user.is_blocked && (
                       <Badge variant="danger">Bloquee</Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted">{user.email}</p>
+                  <p className="break-all text-sm text-muted">{user.email}</p>
                   <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
                     <CalendarDays size={12} />
                     Inscrite le {formatDate(user.created_at)}

@@ -85,7 +85,7 @@ export default function SettingsPage() {
       {activeTab === 'team' && (
         <div className="space-y-4">
           {/* Top bar */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted">
               {users.length} membre{users.length > 1 ? 's' : ''} dans l'équipe
             </p>

@@ -29,7 +29,7 @@ export function AppLayout() {
   }, [location.pathname, closeMobileNav]);
 
   return (
-    <div className="flex min-h-screen flex-col gap-3 bg-canvas px-3 py-3 sm:gap-4 sm:px-5 sm:py-4">
+    <div className="flex min-h-screen w-full min-w-0 max-w-full flex-col gap-3 overflow-x-clip bg-canvas px-3 py-3 sm:gap-4 sm:px-5 sm:py-4">
       <Header
         isMobileNavOpen={isMobileNavOpen}
         onMenuClick={() => setIsMobileNavOpen(true)}
@@ -38,7 +38,7 @@ export function AppLayout() {
       <div className="flex min-w-0 flex-1 gap-4">
         <Sidebar isMobileOpen={isMobileNavOpen} onMobileClose={closeMobileNav} />
 
-        <main className="min-w-0 flex-1">
+        <main className="min-w-0 max-w-full flex-1">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

@@ -19,15 +19,15 @@ export function KpiCard({
   const isPositive = delta !== undefined ? delta >= 0 : true;
 
   return (
-    <Card noPadding className="overflow-hidden">
-      <div className="p-5">
+    <Card noPadding className="w-full min-w-0 max-w-full overflow-hidden">
+      <div className="min-w-0 p-4 sm:p-5">
         {/* Top row: icon + value + delta */}
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-start justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center radius-sm bg-rose/10 text-rose">
               <Icon size={20} />
             </div>
-            <span className="font-heading text-3xl font-semibold text-brown">
+            <span className="min-w-0 break-words font-heading text-2xl font-semibold text-brown sm:text-3xl">
               {value}
             </span>
           </div>
