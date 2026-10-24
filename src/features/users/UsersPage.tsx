@@ -146,7 +146,7 @@ export default function UsersPage() {
       </div>
 
       {/* Filters + Export */}
-      <div className="flex min-w-0 flex-col gap-3 2xl:flex-row 2xl:items-end">
+      <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-end">
         <div className="min-w-0 flex-1">
           <UserFilters
         search={search}
@@ -165,7 +165,7 @@ export default function UsersPage() {
           icon={<Download size={14} />}
           onClick={exportCsv}
           disabled={exporting}
-          className="self-start 2xl:self-auto"
+          className="self-end xl:self-auto"
         >
           {exporting ? 'Export…' : 'Exporter CSV'}
         </Button>
