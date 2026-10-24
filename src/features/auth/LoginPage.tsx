@@ -5,7 +5,7 @@ import { Eye, EyeOff, AlertCircle } from '@/components/icons';
 import { useAuth } from '@/context/AuthContext';
 
 const inputClass =
-  'w-full rounded-xl border border-line bg-white px-4 py-3 text-[15px] text-ink placeholder:text-muted-light outline-none transition-colors focus:border-rose focus:ring-2 focus:ring-rose/15';
+  'w-full min-w-0 rounded-xl border border-line bg-white px-4 py-3 text-[15px] text-ink placeholder:text-muted-light outline-none transition-colors focus:border-rose focus:ring-2 focus:ring-rose/15';
 
 export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
@@ -48,10 +48,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-canvas p-4">
-      <div className="flex w-full overflow-hidden rounded-[28px] bg-white p-3 shadow-card">
+    <div className="flex min-h-dvh w-full min-w-0 max-w-full overflow-x-hidden bg-canvas p-2 sm:min-h-screen sm:p-4">
+      <div className="flex min-h-[calc(100dvh-1rem)] w-full min-w-0 max-w-full overflow-hidden rounded-[24px] bg-white p-2 shadow-card sm:min-h-[calc(100vh-2rem)] sm:rounded-[28px] sm:p-3">
         {/* Visual */}
-        <div className="relative hidden w-1/2 overflow-hidden rounded-[22px] lg:block">
+        <div className="relative hidden min-w-0 w-1/2 overflow-hidden rounded-[22px] lg:block">
           <img
             src="/login-visual.jpg"
             alt=""
@@ -70,19 +70,19 @@ export default function LoginPage() {
         </div>
 
         {/* Form */}
-        <div className="flex flex-1 items-center justify-center px-6 py-10">
+        <div className="flex w-full min-w-0 flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-10 lg:w-1/2 lg:flex-none">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="w-full max-w-[440px]"
+            className="w-full min-w-0 max-w-[440px]"
           >
             <img
               src="/nayha-logo.png"
               alt="NAYHA"
               className="h-16 w-16 rounded-2xl shadow-sm"
             />
-            <h1 className="mt-8 text-[32px] font-semibold tracking-tight text-ink">
+            <h1 className="mt-8 text-[clamp(1.75rem,7vw,2rem)] font-semibold tracking-tight text-ink">
               Connexion à l’administration
             </h1>
             <p className="mt-2 text-base text-muted">
