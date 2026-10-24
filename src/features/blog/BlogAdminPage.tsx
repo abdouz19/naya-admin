@@ -139,31 +139,31 @@ export default function BlogAdminPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-4 sm:space-y-6">
       {/* KPI Row */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        <Card className="p-6">
+      <div className="grid min-w-0 grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:gap-6 xl:grid-cols-4">
+        <Card className="p-4 sm:p-6">
           <Stat
             label="Total articles"
             value={formatNumber(stats?.totalArticles ?? 0)}
             icon={BookOpen}
           />
         </Card>
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <Stat
             label="Articles en ligne"
             value={formatNumber(stats?.publishedArticles ?? 0)}
             icon={CheckCircle2}
           />
         </Card>
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <Stat
             label="Brouillons"
             value={formatNumber(stats?.draftArticles ?? 0)}
             icon={FileText}
           />
         </Card>
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <Stat
             label="Total lectures / vues"
             value={formatNumber(stats?.totalViews ?? 0)}
@@ -173,7 +173,7 @@ export default function BlogAdminPage() {
       </div>
 
       {/* Control Bar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Category pills */}
         <div className="flex flex-wrap gap-2">
           {['Tous', 'Confiance', 'Reconversion', 'Retour à l’emploi', 'Création d’activité'].map(
@@ -194,8 +194,8 @@ export default function BlogAdminPage() {
         </div>
 
         {/* Search & Add CTA */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-2 lg:w-auto lg:flex-row lg:items-center lg:gap-3">
+          <div className="relative min-w-0 w-full lg:w-auto lg:flex-none">
             <Search
               size={15}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
@@ -205,7 +205,7 @@ export default function BlogAdminPage() {
               placeholder="Rechercher un article..."
               value={searchQuery}
               onChange={(e) => changeFilter(setSearchQuery)(e.target.value)}
-              className="pl-9 pr-4 py-2 text-xs rounded-lg border border-gray-200 bg-white text-brown outline-none transition focus:border-rose placeholder:text-muted w-60"
+              className="w-full min-w-0 rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-xs text-brown outline-none transition placeholder:text-muted focus:border-rose sm:pr-4 lg:w-60"
             />
           </div>
 
@@ -214,6 +214,7 @@ export default function BlogAdminPage() {
             size="sm"
             icon={<Plus size={14} />}
             onClick={openAddModal}
+            className="self-end whitespace-nowrap px-3 sm:px-4 lg:self-auto"
           >
             Nouvel article
           </Button>
