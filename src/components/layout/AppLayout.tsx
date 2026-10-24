@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from './Sidebar';
@@ -16,17 +17,26 @@ const routeTitles: Record<string, string> = {
   '/reglages': 'Réglages',
 };
 
-/** Top bar, then the sidebar and the page side by side, on a soft canvas. */
+/** Top bar and page shell, with a drawer for navigation on narrow screens. */
 export function AppLayout() {
   const location = useLocation();
   const title = routeTitles[location.pathname] ?? 'NAYHA';
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const closeMobileNav = useCallback(() => setIsMobileNavOpen(false), []);
+
+  useEffect(() => {
+    closeMobileNav();
+  }, [location.pathname, closeMobileNav]);
 
   return (
-    <div className="flex min-h-screen flex-col gap-4 bg-canvas px-5 py-4">
-      <Header />
+    <div className="flex min-h-screen flex-col gap-3 bg-canvas px-3 py-3 sm:gap-4 sm:px-5 sm:py-4">
+      <Header
+        isMobileNavOpen={isMobileNavOpen}
+        onMenuClick={() => setIsMobileNavOpen(true)}
+      />
 
-      <div className="flex flex-1 gap-4">
-        <Sidebar />
+      <div className="flex min-w-0 flex-1 gap-4">
+        <Sidebar isMobileOpen={isMobileNavOpen} onMobileClose={closeMobileNav} />
 
         <main className="min-w-0 flex-1">
           <AnimatePresence mode="wait">
@@ -36,9 +46,9 @@ export function AppLayout() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2, ease: 'easeInOut' }}
-              className="flex flex-col gap-4"
+              className="flex min-w-0 flex-col gap-3 sm:gap-4"
             >
-              <h1 className="px-1 pt-1 text-[26px] font-bold tracking-tight text-ink">
+              <h1 className="px-1 pt-1 text-2xl font-bold tracking-tight text-ink sm:text-[26px]">
                 {title}
               </h1>
               <Outlet />

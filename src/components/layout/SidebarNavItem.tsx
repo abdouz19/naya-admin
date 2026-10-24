@@ -7,9 +7,10 @@ interface SidebarNavItemProps {
   to: string;
   /** Optional counter shown next to the label (hidden when 0). */
   badge?: number;
+  onNavigate?: () => void;
 }
 
-export function SidebarNavItem({ icon: Icon, label, to, badge }: SidebarNavItemProps) {
+export function SidebarNavItem({ icon: Icon, label, to, badge, onNavigate }: SidebarNavItemProps) {
   const showBadge = typeof badge === 'number' && badge > 0;
   const badgeText = showBadge && badge > 99 ? '99+' : String(badge ?? '');
 
@@ -17,6 +18,7 @@ export function SidebarNavItem({ icon: Icon, label, to, badge }: SidebarNavItemP
     <NavLink
       to={to}
       end={to === '/'}
+      onClick={onNavigate}
       className={({ isActive }) =>
         [
           'flex items-center gap-3 whitespace-nowrap rounded-xl px-3 py-2.5 text-[13.5px] transition-all duration-150',
